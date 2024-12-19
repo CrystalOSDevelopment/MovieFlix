@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Search</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="NavBar">
+        <h1>MovieFlix</h1>
+    </div>
+    
+    <div class="MainBody">
+        <div class="LeftPane">
+            <img src="logo.svg" alt="Logo" width="70%" style="padding-left: 15%; padding-top: 15%;">
+            <ul>
+                <li>Home</li>
+                <li>Recents</li>
+                <li>Favorites</li>
+            </ul>
+            <hr>
+            <ul>
+                <li>Profile</li>
+                <li>Settings</li>
+            </ul>
+        </div>
+        <div style="width: 80%;">
+            <div style="width: 100%;">
+                <form id="searchForm">
+                    <select name="type" id="type">
+                        <option value="title">All</option>
+                        <option value="actor">Movies only</option>
+                        <option value="director">Series only</option>
+                    </select>
+                    <input type="number" id="year" name="year" placeholder="Year" value="2024">
+                    <input type="text" id="SearchTerm" name="SearchTerm" placeholder="Search Term" value="">
+                    <input type="submit" value="Search" id="fetchAllRecords">
+                </form>
+                <div id="movieData">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const year = document.getElementById('year').value;
+            const searchTerm = document.getElementById('SearchTerm').value;
+            const type = document.getElementById('type').value;
+    
+            const movieDataDiv = document.getElementById('movieData');
+            movieDataDiv.innerHTML = '<p>Please wait...</p>';
+    
+            fetch(`index.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `year=${year}&search=${searchTerm}&type=${type}`
+            })
+            .then(response => response.text())
+            .then(() => {
+                fetch(`http://192.168.0.22:3000/movies?year=${searchTerm.trim() != "" ? "" : year}&search=${searchTerm.trim()}&type=${type}`)
+                .then(response => response.json())
+                .then(data => {
+                    movieDataDiv.innerHTML = '';
+                    data.forEach(movie => {
+                        const movieDiv = document.createElement('div');
+                        movieDiv.classList.add('movie');
+                        movieDiv.innerHTML = `
+                            <img src="${movie.cover}" alt="${movie.movie_title} Poster">
+                            <h2>${movie.movie_title}</h2>
+                            <p>Length: ${movie.movie_length} minutes</p>
+                            <p>Release Date: ${movie.release_date}</p>
+                        `;
+                        movieDiv.addEventListener('click', function() {
+                            window.location.href = `VideoPlayer.php?id=${movie.id}`;
+                        });
+                        movieDataDiv.appendChild(movieDiv);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    
+        document.getElementById('fetchAllRecords').addEventListener('click', function() {
+            // Your existing code for fetchAllRecords click event
+        });
+    </script>
+</body>
+</html>
