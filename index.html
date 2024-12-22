@@ -5,41 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Search</title>
     <link rel="stylesheet" href="index.css">
+    <style>
+        body{
+            background-image: linear-gradient(-120deg, #101010 55%, #6FBAFF 100%);
+            background-size: cover;
+            min-height: 100vh;
+        }
+        .Header {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: rgba(16, 16, 16, 0.75);
+            color: white;
+            border-bottom: 1px solid #747474;
+            font-size: 24px;
+        }
+        .Logo img {
+            width: 70px;
+        }
+        .Menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .Menu li {
+            margin: 0 15px;
+            cursor: pointer;
+            padding-top: 15px;
+        }
+        .Menu li:hover {
+            text-decoration: underline;
+        }
+        hr{
+            height: 30px;
+            margin: 15px;
+        }
+        .Search{
+            background-color: rgba(217, 217, 217, 0.5);
+            border-radius: 31.5px;
+            margin: 0px;
+            max-width: 412px;
+            margin-top: 73px;
+            margin-left: 29px;
+        }
+        .Search input[type="text"] {
+            border: none;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            border-radius: 31.5px;
+            outline: none;
+            width: 80%;
+            background-color: transparent;
+        }
+        .Search input[type="submit"] {
+            background-image: url('search.png');
+            background-size: 20px;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent;
+            border: none;
+            margin-left: 20px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .Categories {
+            padding-top: 66px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            margin-left: 29px;
+            background-color: rgba(240, 240, 240, 0.43);
+            max-width: 402px;
+            min-height: fit-content;
+            padding-bottom: 200px;
+            margin-top: 53px;
+            border-radius: 21px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        .Option {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid black;
+            border-radius: 21px;
+            margin: 2px; /* Reduced margin */
+            cursor: pointer;
+            margin: 5px;
+            margin-bottom: 10px;
+            padding: 5px;
+            max-width: 111px;
+            color: black;
+        }
+    </style>
 </head>
 <body>
-    <div class="NavBar">
-        <h1>MovieFlix</h1>
+    <div class="Header">
+        <div class="Logo">
+            <img src="logo.svg" alt="Logo" width="70vh">
+        </div>
+        <div class="Menu">
+            <ul>
+                <li style="font-weight: bold;">Főoldal</li>
+                <hr>
+                <li>Legutóbbiak</li>
+                <hr>
+                <li>Kedvencek</li>
+                <hr>
+                <li>Profilom</li>
+                <hr>
+                <li>Beállítások</li>
+            </ul>
+        </div>
     </div>
     
     <div class="MainBody">
-        <div class="LeftPane">
-            <img src="logo.svg" alt="Logo" width="70%" style="padding-left: 15%; padding-top: 15%;">
-            <ul>
-                <li>Home</li>
-                <li>Recents</li>
-                <li>Favorites</li>
-            </ul>
-            <hr>
-            <ul>
-                <li>Profile</li>
-                <li>Settings</li>
-            </ul>
+        <div class="Search">
+            <form id="searchForm">
+                <input type="submit" value="" id="fetchAllRecords">
+                <input type="text" id="SearchTerm" name="SearchTerm" placeholder="" value="">
+            </form>
         </div>
-        <div style="width: 80%;">
-            <div style="width: 100%;">
-                <form id="searchForm">
-                    <select name="type" id="type">
-                        <option value="title">All</option>
-                        <option value="actor">Movies only</option>
-                        <option value="director">Series only</option>
-                    </select>
-                    <input type="number" id="year" name="year" placeholder="Year" value="2024">
-                    <input type="text" id="SearchTerm" name="SearchTerm" placeholder="Search Term" value="">
-                    <input type="submit" value="Search" id="fetchAllRecords">
-                </form>
-                <div id="movieData">
-                </div>
-            </div>
+        <div class="Categories">
+            <div class="Option" style="border: 1px solid white; color: white;">Kategória</div>
+            <div class="Option">Kategória</div>
+            <div class="Option">Kategória</div>
+            <div class="Option">Kategória</div>
+            <div class="Option">Kategória</div>
+            <div class="Option">Kategória</div>
+            <div class="Option">Kategória</div>
         </div>
     </div>
 
