@@ -164,7 +164,8 @@ echo "<!DOCTYPE html>
             font-family: 'Inter', sans-serif;
             background: #121212;
             background-image: url('https://images.unsplash.com/photo-1665652475985-37e285aeff53?q=80&w=2662&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-            background-cover: cover;
+            background-size: cover;
+            background-repeat: no-repeat;
             color: #fff;
         }
         .page-content {
@@ -561,28 +562,38 @@ echo "<!DOCTYPE html>
     </div>
     
     <script src=\"https://vjs.zencdn.net/7.11.4/video.min.js\"></script>
-    <script>
-        const bottomBar = document.querySelector(\".bottom-bar\");
-        const scrollAmount = 10; // Mennyit görgessünk, amikor rávisszük az egeret
+<script>
+    const bottomBar = document.querySelector(\".bottom-bar\");
 
-        // Alapból egy kicsit le görgetjük az oldalt
-        window.scrollTo({ top: 200, behavior: \"smooth\" }); // Állítsd be a kívánt alap görgetési pozíciót
+    // Alapértelmezett helyzet: kicsit fentebb
+    bottomBar.style.position = \"fixed\";
+    bottomBar.style.bottom = \"-330px\"; // Alapértelmezett távolság az aljától
+    bottomBar.style.transition = \"bottom 0.3s ease-in-out\"; // Simább mozgás
 
-        // Amikor az egér rámegy a bottom-bar-ra, teljesen le görgetünk
-        bottomBar.addEventListener(\"mouseenter\", function () {
-            window.scrollTo({ bottom: 0, behavior: \"smooth\" }); // Görgetés az oldal aljáig
-            bottomBar.classList.add(\"scrolled\"); 
-        });
-        var video = document.getElementById(\"trailer\");
-        var noTrailerMessage = document.getElementById(\"no-trailer-message\");
+    // Amikor az egér rámegy a bottom-bar-ra, teljesen az aljára csúszik
+    bottomBar.addEventListener(\"mouseenter\", function () {
+        bottomBar.style.bottom = \"0px\"; // Teljesen az oldal aljára kerül
+        bottomBar.classList.add(\"scrolled\");
+    });
 
-        if (video.readyState !== 4) {
-            // Ha az előzetes nem található
-            noTrailerMessage.style.display = \"block\";
-            video.style.display = \"none\";
-            
-        }
-    </script>
+    // Amikor az egér elhagyja a bottom-bar-t, visszaáll az alap helyzetbe
+    bottomBar.addEventListener(\"mouseleave\", function () {
+        bottomBar.style.bottom = \"-330px\"; // Alapértelmezett távolság az aljától
+        bottomBar.classList.remove(\"scrolled\");
+    });
+
+    // Ellenőrizze az előzetes állapotát
+    var video = document.getElementById(\"trailer\");
+    var noTrailerMessage = document.getElementById(\"no-trailer-message\");
+
+    if (video.readyState !== 4) {
+        // Ha az előzetes nem található
+        noTrailerMessage.style.display = \"block\";
+        video.style.display = \"none\";
+    }
+</script>
+
+
     </body>
 </html>";
 ?>

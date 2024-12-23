@@ -107,10 +107,21 @@
             align-items: stretch;
         }
 
-        .MainBody {
+        .SearchOptions {
             display: flex;
             flex-direction: column;
+            margin-right: 30px;
+        }
+
+        .movieData{
+            display: flex;
+            flex-wrap: wrap;
             justify-content: center;
+            gap: 20px;
+        }
+
+        .movieData > .movie > img{
+            width: 20px;
         }
 
     </style>
@@ -136,29 +147,35 @@
     </div>
     
     <div class="MainBody">
-        <div class="Search">
-            <form id="searchForm">
-                <input type="submit" value="" id="fetchAllRecords">
-                <input type="text" id="SearchTerm" name="SearchTerm" placeholder="" value="">
-            </form>
+        <div class="SearchOptions">
+            <div class="Search">
+                <form id="searchForm">
+                    <input type="submit" value="" id="fetchAllRecords">
+                    <input type="text" id="SearchTerm" name="SearchTerm" placeholder="" value="">
+                </form>
+            </div>
+            <div class="Categories">
+                <div class="Option" style="border: 1px solid white; color: white;">Kategória</div>
+                <div class="Option">Kategória</div>
+                <div class="Option">Kategória</div>
+                <div class="Option">Kategória</div>
+                <div class="Option">Kategória</div>
+                <div class="Option">Kategória</div>
+                <div class="Option">Kategória</div>
+            </div>
         </div>
-        <div class="Categories">
-            <div class="Option" style="border: 1px solid white; color: white;">Kategória</div>
-            <div class="Option">Kategória</div>
-            <div class="Option">Kategória</div>
-            <div class="Option">Kategória</div>
-            <div class="Option">Kategória</div>
-            <div class="Option">Kategória</div>
-            <div class="Option">Kategória</div>
-        </div>
+        <div id="movieData"></div>
     </div>
 
     <script>
         document.getElementById('searchForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const year = document.getElementById('year').value;
+            //const year = document.getElementById('year').value;
             const searchTerm = document.getElementById('SearchTerm').value;
-            const type = document.getElementById('type').value;
+            //const type = document.getElementById('type').value;
+
+            const year = 0;
+            const type = "";
     
             const movieDataDiv = document.getElementById('movieData');
             movieDataDiv.innerHTML = '<p>Please wait...</p>';
@@ -179,15 +196,29 @@
                     data.forEach(movie => {
                         const movieDiv = document.createElement('div');
                         movieDiv.classList.add('movie');
-                        movieDiv.innerHTML = `
+
+                        let cleanedTitle = movie.movie_title.replace(/\(\d{4}\)(\s*\(\d+\))*$/, '');
+                        
+                        movieDiv.style.backgroundImage = `url(${movie.cover})`;
+                        movieDiv.style.backgroundSize = 'cover';
+                        movieDiv.style.backgroundPosition = 'center';
+                        movieDiv.style.overflow = 'hidden';
+                        
+                        // Create a div
+                        const SubmovieDiv = document.createElement('div');
+                        SubmovieDiv.innerHTML = `
                             <img src="${movie.cover}" alt="${movie.movie_title} Poster">
-                            <h2>${movie.movie_title}</h2>
-                            <p>Length: ${movie.movie_length} minutes</p>
-                            <p>Release Date: ${movie.release_date}</p>
+                            <h2>${cleanedTitle}</h2>
+                            <p>${movie.release_date}</p>
                         `;
+
+                        SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
+                        SubmovieDiv.style.height = "100%";
+                        
                         movieDiv.addEventListener('click', function() {
                             window.location.href = `VideoPlayer.php?id=${movie.id}`;
                         });
+                        movieDiv.appendChild(SubmovieDiv);
                         movieDataDiv.appendChild(movieDiv);
                     });
                 })

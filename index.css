@@ -14,7 +14,7 @@ h1 {
     color: #e50914;
 }
 
-/* Search Form /
+/* Search Form */
 form {
     display: flex;
     justify-content: center;
@@ -51,15 +51,25 @@ input[type="submit"]:hover {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
+    width: 100%;
+    padding-top: 30px;
+}
+
+#Poster {
+    max-width: 209px;
     padding: 20px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .movie {
-    background-color: #222;
-    border-radius: 10px;
-    overflow: hidden;
+    /* Ide kellene írni a kártya tulajdonságait */
+    max-width: 243px;
+    max-height: 470px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s;
+    border-radius: 32px;
+    border: 1px solid white;
 }
 
 .movie:hover {
@@ -67,21 +77,25 @@ input[type="submit"]:hover {
 }
 
 .movie img {
-    width: 100%;
-    height: auto;
+    width: 80%;
+    height: 55%;
     display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 40px;
 }
 
-.movie h2 {
-    font-size: 1.2em;
-    margin: 10px;
-    color: #fff;
+.movie > * > h2 {
+    padding-left: 10px;
+    padding-top: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    max-width: 60%;
 }
 
-.movie p {
-    font-size: 0.9em;
-    margin: 10px;
-    color: #aaa;
+.movie > * > p {
+    padding-left: 10px;
+    font-size: 14px;
 }
 
 @media screen and (max-width: 600px) {
