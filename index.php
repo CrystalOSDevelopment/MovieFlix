@@ -24,12 +24,12 @@ if(trim($SearchWord) != ""){
 try {
     $pdo = new PDO('mysql:host=localhost;dbname=links_db', 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    
     // Check if the movie already exists in the database
     $stmt = $pdo->prepare("SELECT * FROM links WHERE movie_title LIKE :search_word");
     $stmt->execute(['search_word' => '%' . $SearchWord . '%']);
     $existingMovies = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    
     if (!empty($existingMovies)) {
         // Display existing movies
         foreach ($existingMovies as $movie) {
@@ -50,8 +50,23 @@ try {
         $doc->loadHTML($htmlString);
         $xpath = new DOMXPath($doc);
 
-        $titles = $xpath->evaluate('//div[@class="container"]//section[@class="content-box"]//ul[@class="row list-unstyled movie-list"]//li/a');
-        $covers = $xpath->evaluate('//div[@class="container"]//section[@class="content-box"]//ul[@class="row list-unstyled movie-list"]//li/a/img');
+        // Debug: Print the HTML string to verify the structure
+        echo "<pre>" . htmlspecialchars($htmlString) . "</pre>";
+
+        // Simplify the XPath expression for debugging
+        $titles = $xpath->evaluate('//ul[@class="row list-unstyled movie-list"]//li/a');
+        $covers = $xpath->evaluate('//ul[@class="row list-unstyled movie-list"]//li/a/img');
+
+        // Debug: Print the number of elements found
+        echo "Number of titles found: " . $titles->length . "<br>";
+        echo "Number of covers found: " . $covers->length . "<br>";
+
+        // Refine the XPath expression to match the desired elements
+        //$titles = $xpath->evaluate('//div[@class="container"]//section[@class="content-box"]//ul[@class="row list-unstyled movie-list"]//li/a');
+        //$covers = $xpath->evaluate('//div[@class="container"]//section[@class="content-box"]//ul[@class="row list-unstyled movie-list"]//li/a/img');
+
+        //echo "Number of titles found with refined XPath: " . $titles->length . "<br>";
+        //echo "Number of covers found with refined XPath: " . $covers->length . "<br>";
 
         // Cycles thru the movies
         foreach ($titles as $index => $title) {
