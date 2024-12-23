@@ -14,7 +14,7 @@ h1 {
     color: #e50914;
 }
 
-/ Search Form /
+/* Search Form /
 form {
     display: flex;
     justify-content: center;
@@ -46,7 +46,7 @@ input[type="submit"]:hover {
     background-color: #f40612;
 }
 
-/ Movie Grid */
+/* Movie Grid */
 #movieData {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
