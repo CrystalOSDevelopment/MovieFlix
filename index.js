@@ -17,11 +17,9 @@ if (!urlToVisit) {
     page.on('response', async (response) => {
         const url = response.url();
         // Check if the URL is an m3u8 file
-        if (url.includes('master.m3u8')) {
+        if (url.includes('master.m3u8') || url.includes('indavideo.hu') || url.includes('videa.hu')) {
             console.log(url);
-        }
-        else if(url.includes('videa.hu')) {
-            console.log(url);
+            return;
         }
     });
 
