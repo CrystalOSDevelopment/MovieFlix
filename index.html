@@ -11,36 +11,41 @@
             background-size: cover;
             min-height: 100vh;
         }
-        .Header {
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
+        .header {
+            z-index: 999;
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
             background-color: rgba(16, 16, 16, 0.75);
             color: white;
             border-bottom: 1px solid #747474;
-            font-size: 24px;
-        }
-        .Logo img {
-            width: 70px;
-        }
-        .Menu ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
+            backdrop-filter: blur(5px);
             display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
-        .Menu li {
-            margin: 0 15px;
+        
+        .logo {
+            height: 50px;
+            margin-right: 30px;
+        }
+        .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .menu-item {
+            color: #fff;
+            font-size: 16px;
             cursor: pointer;
-            padding-top: 15px;
+            transition: color 0.3s;
         }
-        .Menu li:hover {
-            text-decoration: underline;
+        .menu-item:hover {
+            color: #1e90ff;
         }
-        hr{
-            height: 30px;
-            margin: 15px;
-        }
+        
         .Search{
             background-color: rgba(217, 217, 217, 0.5);
             border-radius: 31.5px;
@@ -70,19 +75,31 @@
             cursor: pointer;
         }
         .Categories {
-            padding-top: 66px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            padding-top: 6px;
             margin-left: 29px;
             background-color: rgba(240, 240, 240, 0.43);
             max-width: 402px;
             min-height: fit-content;
             padding-bottom: 200px;
             margin-top: 53px;
-            border-radius: 21px;
+            border-radius: 23px;
             padding-left: 5px;
-            padding-right: 5px;
+            /* padding-right: 5px; */
         }
+
+        .categories-grid {
+        display: inline-flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 0px;
+        margin: 0px;
+        }   
+
+        .categories-label {
+            padding-left: 10px;
+            font-size:13px;
+        }
+
         .Option {
             display: flex;
             justify-content: center;
@@ -93,8 +110,8 @@
             cursor: pointer;
             margin: 5px;
             margin-bottom: 10px;
-            padding: 5px;
-            max-width: 111px;
+            padding: 10px;
+            min-width: min-content;
             color: black;
         }
         form {
@@ -127,22 +144,16 @@
     </style>
 </head>
 <body>
-    <div class="Header">
-        <div class="Logo">
-            <img src="logo.svg" alt="Logo" width="70vh">
-        </div>
-        <div class="Menu">
-            <ul>
-                <li style="font-weight: bold;">Főoldal</li>
-                <hr>
-                <li>Legutóbbiak</li>
-                <hr>
-                <li>Kedvencek</li>
-                <hr>
-                <li>Profilom</li>
-                <hr>
-                <li>Beállítások</li>
-            </ul>
+    <div class="header">
+        <img src="logo.svg" alt="MovieFlix Logo" class="logo">
+        <div class="menu">
+            <div class="menu-item">
+                <a href="index.html" style="text-decoration: none; color: inherit;">Főoldal</a>
+            </div>
+            <div class="menu-item">Legutóbbiak</div>
+            <div class="menu-item">Kedvencek</div>
+            <div class="menu-item">Profilom</div>
+            <div class="menu-item">Beállítások</div>
         </div>
     </div>
     
@@ -155,13 +166,22 @@
                 </form>
             </div>
             <div class="Categories">
-                <div class="Option" style="border: 1px solid white; color: white;">Kategória</div>
-                <div class="Option">Kategória</div>
-                <div class="Option">Kategória</div>
-                <div class="Option">Kategória</div>
-                <div class="Option">Kategória</div>
-                <div class="Option">Kategória</div>
-                <div class="Option">Kategória</div>
+            <span class="categories-label">Szűrés kategóriák szerint</span>
+                <div class="categories-grid">
+                    <div class="Option" style="border: 1px solid white; color: white;">Év (növekvő)</div>
+                    <div class="Option">Év (csökkenő)</div>
+                    <div class="Option">Cím (A-Z)</div>
+                    <div class="Option">Cím (Z-A)</div>
+                    <div class="Option">Rendező</div>
+                    <div class="Option">Színész</div>
+                    <div class="Option">Műfaj</div>
+                    <div class="Option">Értékelés (növekvő)</div>
+                    <div class="Option">Értékelés (csökkenő)</div>
+                    <div class="Option">Hossz (növekvő)</div>
+                    <div class="Option">Hossz (csökkenő)</div>
+                    <div class="Option">Nyelv</div>
+                    <div class="Option">Ország</div>
+                </div>
             </div>
         </div>
         <div id="movieData"></div>

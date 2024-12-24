@@ -50,9 +50,6 @@ try {
         $doc->loadHTML($htmlString);
         $xpath = new DOMXPath($doc);
 
-        // Debug: Print the HTML string to verify the structure
-        echo "<pre>" . htmlspecialchars($htmlString) . "</pre>";
-
         // Simplify the XPath expression for debugging
         $titles = $xpath->evaluate('//ul[@class="row list-unstyled movie-list"]//li/a');
         $covers = $xpath->evaluate('//ul[@class="row list-unstyled movie-list"]//li/a/img');
@@ -60,13 +57,6 @@ try {
         // Debug: Print the number of elements found
         echo "Number of titles found: " . $titles->length . "<br>";
         echo "Number of covers found: " . $covers->length . "<br>";
-
-        // Refine the XPath expression to match the desired elements
-        //$titles = $xpath->evaluate('//div[@class="container"]//section[@class="content-box"]//ul[@class="row list-unstyled movie-list"]//li/a');
-        //$covers = $xpath->evaluate('//div[@class="container"]//section[@class="content-box"]//ul[@class="row list-unstyled movie-list"]//li/a/img');
-
-        //echo "Number of titles found with refined XPath: " . $titles->length . "<br>";
-        //echo "Number of covers found with refined XPath: " . $covers->length . "<br>";
 
         // Cycles thru the movies
         foreach ($titles as $index => $title) {
@@ -208,7 +198,41 @@ try {
                             }
                         }
 
-                        if ($imdbCode !== null) {
+                        // If the movie link is empty, pull it from another source
+                        if ($ExportLink == "") {
+                            $response2 = $httpClient->get("https://mozimix.com/?s=" . $SearchWord);
+                            $htmlContent2 = (string) $response2->getBody();
+                            libxml_use_internal_errors(true);
+                            $domDocument2 = new DOMDocument();
+                            $domDocument2->loadHTML($htmlContent2);
+                            $xpath2 = new DOMXPath($domDocument2);
+
+                            // Debug: Print the HTML string to verify the structure
+                            echo "<pre>" . htmlspecialchars($htmlContent2) . "</pre>";
+
+                            // Find all the movie titles
+                            $movies = $xpath2->evaluate('//div[@id="dt_contenedor"]//div[@id="contenedor"]//div[@class="module"]//div[@class="content rigth csearch"]//div[@class="search-page"]//div[@class="result-item"]//article//div[@class="details"]//div[@class="title"]/a');
+
+                            // Write out every movie link
+                            foreach ($movies as $index => $movieTitleElement) {
+                                $movieLink = $movieTitleElement->getAttribute('href');
+                                // Extract inner html
+                                $movieName = $movieTitleElement->textContent;
+                                if(str_contains($movieTitle, $movieName)){
+                                    echo 'Adatlap: <a href="' . htmlspecialchars($movieLink) . '">' . htmlspecialchars($movieLink) . '</a><br>';
+                                    $ExportLink = $movieLink;
+                                    break;
+                                }
+                            }
+
+                            // Export the video from the new source from the video tag
+                            if ($ExportLink !== "") {
+                                $ExportLink = exec("node index.js " . escapeshellarg($movieLink));
+                                echo 'URL: <a href="' . $ExportLink . '">' . htmlspecialchars($secondDivText) . '</a><br>';
+                            }
+                        }
+
+                        if ($imdbCode !== null && $ExportLink !== "") {
                             $stmt = $pdo->prepare("INSERT INTO links (movie_title, movie_length, link, release_date, cover, imdb_code, description) VALUES (:movie_title, :movie_length, :link, :release_date, :cover, :imdb_code, :description)");
                             $stmt->execute([
                                 'movie_title' => $movieTitle,

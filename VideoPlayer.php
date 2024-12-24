@@ -167,6 +167,7 @@ echo "<!DOCTYPE html>
             background-size: cover;
             background-repeat: no-repeat;
             color: #fff;
+            overflow: hidden;
         }
         .page-content {
             position: relative;
@@ -209,7 +210,9 @@ echo "<!DOCTYPE html>
             left: 0;
             width: 100%;
             height: 70px;
-            background: rgba(0, 0, 0, 0.85);
+            background-color: rgba(16, 16, 16, 0.75);
+            color: white;
+            border-bottom: 1px solid #747474;
             backdrop-filter: blur(5px);
             display: flex;
             align-items: center;

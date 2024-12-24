@@ -20,6 +20,9 @@ if (!urlToVisit) {
         if (url.includes('master.m3u8')) {
             console.log(url);
         }
+        else if(url.includes('videa.hu')) {
+            console.log(url);
+        }
     });
 
     // Navigate to the provided URL
