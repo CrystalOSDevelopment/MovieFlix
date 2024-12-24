@@ -141,6 +141,102 @@
             width: 20px;
         }
 
+        categories-grid {
+            display: flex; /* Alapértelmezetten nyitva asztali nézetben */
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .categories-header {
+            display: none; /* Csak mobil nézetben jelenik meg */
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background-color: rgba(240, 240, 240, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .categories-arrow {
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .categories-header {
+                display: flex; /* Mobil nézetben jelenjen meg */
+            }
+            
+            .categories-grid {
+                display: none; /* Mobil nézetben alapértelmezetten rejtve */
+            }
+
+            .categories-grid.open {
+                display: flex; /* Mobilon kinyitva jelenjen meg */
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                background-image: linear-gradient(-120deg, #101010 55%, #6FBAFF 100%);
+                background-size: cover;
+                min-height: 100vh;
+            }
+            .header {
+                flex-direction: column;
+                align-items: center;
+                padding: 25px 20px; 
+            }
+           
+            .SearchOptions {
+                display: flex
+            ;
+                flex-direction: column;
+                margin-right: 30px;
+                /* width: 1000px; */
+            }
+
+            .MainBody {
+                display: block;
+                margin: 0 auto;
+            }
+
+            .Search input[type="submit"] {
+                width: fit-content;
+            }
+           
+            .menu-item:last-child {
+                border-bottom: none; /* Utolsó elem alatt ne legyen vonal */
+            }
+            .logo {
+                display: none;
+            }
+            
+            .Search {
+                max-width: 402px;
+                min-height: fit-content;
+            }
+            .Categories {
+                padding: 10px;
+            }
+            .categories-grid {
+                justify-content: center;
+            }
+            .Option {
+                flex: 1 1 100%;
+                text-align: center;
+            }
+            .movieData {
+                flex-direction: column;
+            }
+            .movieData > .movie {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -151,8 +247,8 @@
                 <a href="index.html" style="text-decoration: none; color: inherit;">Főoldal</a>
             </div>
             <div class="menu-item">Legutóbbiak</div>
-            <div class="menu-item">Kedvencek</div>
-            <div class="menu-item">Profilom</div>
+            <!-- <div class="menu-item">Kedvencek</div>
+            <div class="menu-item">Profilom</div> -->
             <div class="menu-item">Beállítások</div>
         </div>
     </div>
@@ -166,9 +262,12 @@
                 </form>
             </div>
             <div class="Categories">
-            <span class="categories-label">Szűrés kategóriák szerint</span>
-                <div class="categories-grid">
-                    <div class="Option" style="border: 1px solid white; color: white;">Év (növekvő)</div>
+                <div class="categories-header" onclick="toggleCategories()">
+                    <span class="categories-label">Szűrés kategóriák szerint</span>
+                    <span class="categories-arrow">&#9660;</span>
+                </div>
+                <div class="categories-grid" id="categoriesGrid">
+                    <div class="Option">Év (növekvő)</div>
                     <div class="Option">Év (csökkenő)</div>
                     <div class="Option">Cím (A-Z)</div>
                     <div class="Option">Cím (Z-A)</div>
@@ -183,6 +282,7 @@
                     <div class="Option">Ország</div>
                 </div>
             </div>
+            
         </div>
         <div id="movieData"></div>
     </div>
@@ -250,6 +350,21 @@
         document.getElementById('fetchAllRecords').addEventListener('click', function() {
             // Your existing code for fetchAllRecords click event
         });
+    </script>
+    <script>
+        if (window.innerWidth <= 768) {
+            const toggleButton = document.querySelector('.categories-header');
+            const categoriesGrid = document.getElementById('categoriesGrid');
+            const arrow = document.querySelector('.categories-arrow');
+
+            toggleButton.addEventListener('click', () => {
+                categoriesGrid.classList.toggle('open');
+                arrow.style.transform = categoriesGrid.classList.contains('open') 
+                    ? 'rotate(180deg)' 
+                    : 'rotate(0deg)';
+            });
+        }
+
     </script>
 </body>
 </html>
