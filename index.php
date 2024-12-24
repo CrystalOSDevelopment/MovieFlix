@@ -113,10 +113,11 @@ try {
                 // Extract data from the movie page, but only if it doesn't exist in the database
                 $imdbInfo = $xpath->evaluate('.//span[contains(text(), "IMDB:")]', $title)->item(0)->textContent ?? 'N/A';
                 $director = $xpath->evaluate('.//li[span[text()="Rendező:"]]', $title)->item(0)->textContent ?? 'N/A';
-                $length = $xpath->evaluate('.//li[span[text="Hossz:"]]', $title)->item(0)->textContent ?? 'N/A';
-                $category = $xpath->evaluate('.//li[span[text="Kategória:"]]', $title)->item(0)->textContent ?? 'N/A';
+                $length = $xpath->evaluate('.//li[span[text()="Hossz:"]]', $title)->item(0)->textContent ?? 'N/A';
+                $category = $xpath->evaluate('.//li[span[text()="Kategória:"]]', $title)->item(0)->textContent ?? 'N/A';// Needs to be fixed
                 $rating = $xpath->evaluate('.//span[contains(@class, "imdb")]', $title)->item(0)->textContent ?? 'N/A';
                 $description = "";
+                $category = htmlspecialchars(trim(str_replace("Kategória:", "", $category)));
 
                 $textDivs = $moviePageXpath->evaluate('//div[contains(@class, "text")]');
                 foreach ($textDivs as $textDiv) {
@@ -132,6 +133,8 @@ try {
                 $totalMinutes = convertToMinutes($lengthWithoutLabel);
                 echo "Hossz: " . htmlspecialchars(trim($totalMinutes)) . " perc" . "<br>";
                 echo "Értékelés: " . htmlspecialchars(trim($rating)) . "<br><br>";
+                echo "Kategrória: " . htmlspecialchars(str_replace("Kategória:", "", trim($category))) . "<br>";
+                echo "Rendező: " . htmlspecialchars(trim($director)) . "<br>";
                 
                 foreach ($bekuldottLinkek as $bekuldottLink) {
                     
@@ -233,7 +236,7 @@ try {
                         // }
 
                         if ($imdbCode !== null) {
-                            $stmt = $pdo->prepare("INSERT INTO links (movie_title, movie_length, link, release_date, cover, imdb_code, description) VALUES (:movie_title, :movie_length, :link, :release_date, :cover, :imdb_code, :description)");
+                            $stmt = $pdo->prepare("INSERT INTO links (movie_title, movie_length, link, release_date, cover, imdb_code, description, Category) VALUES (:movie_title, :movie_length, :link, :release_date, :cover, :imdb_code, :description, :Category)");
                             $stmt->execute([
                                 'movie_title' => $movieTitle,
                                 'movie_length' => $totalMinutes,
@@ -242,6 +245,7 @@ try {
                                 'cover' => $coverUrl,
                                 'imdb_code' => $imdbCode,
                                 'description' => trim($description),
+                                'Category' => $category,
                             ]);
                             echo "Added new movie: " . htmlspecialchars($movieTitle) . "<br>";
                             echo $totalMinutes . " perc<br>";

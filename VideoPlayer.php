@@ -169,11 +169,15 @@ if ($MovieID) {
             foreach ($movies as $index => $movieTitleElement) {
                 $movieLink = $movieTitleElement->getAttribute('href');
                 // Extract inner html
-                $movieName = $movieTitleElement->textContent;
-                if(str_contains($Film_Cim, $Film_Cim)){
-                    $ExportLink = $movieLink;
-                }
-                else if($Film_Cim == $movieName){
+                $movieName = trim($movieTitleElement->textContent);
+            
+                // Clean the movie title
+                $cleanedFilmCim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
+                $cleanedFilmCim = preg_replace('/\.*$/', '', $cleanedFilmCim);
+                $cleanedFilmCim = trim($cleanedFilmCim);
+            
+                // Case-insensitive comparison
+                if (strcasecmp($cleanedFilmCim, $movieName) == 0) {
                     $ExportLink = $movieLink;
                     $BestLink = $movieLink;
                     break;

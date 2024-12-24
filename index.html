@@ -309,7 +309,10 @@
             })
             .then(response => response.text())
             .then(() => {
-                fetch(`movies.php?year=${searchTerm.trim() != "" ? "" : year}&search=${searchTerm.trim()}&type=${type}`)
+                //Get all the Option elements nad find the index of the first selected option
+                const selectedOption = Array.from(document.querySelectorAll('.Option')).findIndex(option => option.style.backgroundColor != 'transparent');
+                console.log(selectedOption);
+                fetch(`movies.php?year=${searchTerm.trim() != "" ? "" : year}&search=${searchTerm.trim()}&orderBy=` + selectedOption)
                 .then(response => response.json())
                 .then(data => {
                     movieDataDiv.innerHTML = '';
@@ -342,6 +345,7 @@
                             window.location.href = `VideoPlayer.php?id=${movie.id}`;
                         });
                         movieDiv.appendChild(SubmovieDiv);
+                        
                         movieDataDiv.appendChild(movieDiv);
                     });
                 })
@@ -352,6 +356,15 @@
     
         document.getElementById('fetchAllRecords').addEventListener('click', function() {
             // Your existing code for fetchAllRecords click event
+        });
+    </script>
+    <script>
+        let Options = document.querySelectorAll('.Option');
+        Options.forEach(option => {
+            option.addEventListener('click', function() {
+                Options.forEach(option => option.style.backgroundColor = 'transparent');
+                option.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+            });
         });
     </script>
     <script>

@@ -19,7 +19,6 @@ if (!urlToVisit) {
         // Check if the URL is an m3u8 file
         if (url.includes('master.m3u8') || url.includes('indavideo.hu') || url.includes('videa.hu')) {
             console.log(url);
-            return;
         }
     });
 
