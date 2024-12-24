@@ -318,7 +318,10 @@
                         movieDiv.classList.add('movie');
 
                         let cleanedTitle = movie.movie_title.replace(/\(\d{4}\)(\s*\(\d+\))*$/, '');
-                        
+                        if (cleanedTitle.length > 40) { 
+                            cleanedTitle = cleanedTitle.substring(0, 17) + '...'; 
+                        }
+
                         movieDiv.style.backgroundImage = `url(${movie.cover})`;
                         movieDiv.style.backgroundSize = 'cover';
                         movieDiv.style.backgroundPosition = 'center';
