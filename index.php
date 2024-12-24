@@ -108,6 +108,7 @@ try {
                 $moviePageDoc->loadHTML($moviePageHtml);
                 $moviePageXpath = new DOMXPath($moviePageDoc);
                 
+                // This gets called in the foreach loop
                 $bekuldottLinkek = $moviePageXpath->evaluate('//div[@class="container movie-page"]//div[@class="row"]//div[@class="col-md-9 col-sm-12"]//section[@class="content-box"]//div[@class="row"]//div[@class="col-md-6 col-sm-12"]/a/@href');
                 
                 // Extract data from the movie page, but only if it doesn't exist in the database
@@ -124,6 +125,8 @@ try {
                     $description = htmlspecialchars($textDiv->textContent);
                     break;
                 }
+
+                $director = htmlspecialchars(trim(str_replace("Rendező:", "", $director)));
                 
                 // Display movie data
                 echo "Cím: " . htmlspecialchars(trim($movieTitle)) . "<br>";
@@ -135,9 +138,20 @@ try {
                 echo "Értékelés: " . htmlspecialchars(trim($rating)) . "<br><br>";
                 echo "Kategrória: " . htmlspecialchars(str_replace("Kategória:", "", trim($category))) . "<br>";
                 echo "Rendező: " . htmlspecialchars(trim($director)) . "<br>";
+                echo "Rating: " . htmlspecialchars(trim($rating)) . "<br>";
                 
                 foreach ($bekuldottLinkek as $bekuldottLink) {
-                    
+                    // Extract the actors list from the Adatlap page
+                    $Actors = $moviePageXpath->evaluate('//div[@class="container movie-page"]//div[@class="row"]//aside[@class="col-md-3 col-sm-12 sidebar"]//div[@class="sidebar-article details"]//ul[@class="list-unstyled"]//li//a');
+                    // Write out every actor
+                    $actorList = "";
+                    foreach ($Actors as $actor) {
+                        $actorList .= $actor->textContent . ", ";
+                    }
+                    $actorList = rtrim($actorList, ", ");
+                    echo "Szereplők: " . htmlspecialchars($actorList) . "<br>";
+                    $director .= "\n" . $actorList;
+
                     // It doesn't enter here yet
                     $detailLink = $bekuldottLink->textContent;
                     echo 'Beküldött: <a href="' . $bekuldottLink->textContent . '">' . $bekuldottLink->textContent . '</a><br>';
@@ -236,7 +250,7 @@ try {
                         // }
 
                         if ($imdbCode !== null) {
-                            $stmt = $pdo->prepare("INSERT INTO links (movie_title, movie_length, link, release_date, cover, imdb_code, description, Category) VALUES (:movie_title, :movie_length, :link, :release_date, :cover, :imdb_code, :description, :Category)");
+                            $stmt = $pdo->prepare("INSERT INTO links (movie_title, movie_length, link, release_date, cover, imdb_code, description, Category, Rating, DirANDActors) VALUES (:movie_title, :movie_length, :link, :release_date, :cover, :imdb_code, :description, :Category, :Rating, :DirANDActors)");
                             $stmt->execute([
                                 'movie_title' => $movieTitle,
                                 'movie_length' => $totalMinutes,
@@ -246,6 +260,8 @@ try {
                                 'imdb_code' => $imdbCode,
                                 'description' => trim($description),
                                 'Category' => $category,
+                                'Rating' => $rating,
+                                'DirANDActors' => $director,
                             ]);
                             echo "Added new movie: " . htmlspecialchars($movieTitle) . "<br>";
                             echo $totalMinutes . " perc<br>";
