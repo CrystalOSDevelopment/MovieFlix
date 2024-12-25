@@ -47,12 +47,18 @@ input[type="submit"]:hover {
 }
 
 /* Movie Grid */
-#movieData {
+#movieData > div, #movieData{
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(243px, 0fr));
+    gap: 40px;
     width: 100%;
-    padding-top: 30px;
+}
+
+#movieData > h2{
+    padding: 20px 0px 20px 0px;
+    margin-left: -50px;
+    font-weight: bold;
+    font-size: 32px;
 }
 
 #Poster {
@@ -65,7 +71,8 @@ input[type="submit"]:hover {
 .movie {
     /* Ide kellene írni a kártya tulajdonságait */
     max-width: 243px;
-    max-height: 470px;
+    min-width: 243px;
+    height: 470px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s;
     border-radius: 32px;
@@ -82,7 +89,6 @@ input[type="submit"]:hover {
     display: block;
     margin-left: auto;
     margin-right: auto;
-    padding-top: 40px;
     border-radius: 27px;
 }
 

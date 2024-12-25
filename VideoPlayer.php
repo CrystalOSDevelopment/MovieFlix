@@ -198,6 +198,25 @@ if ($MovieID) {
     echo 'No ID provided.';
 }
 
+// Finally add the id of the film to recents table
+// First check if the record already exists
+$stmt = $pdo->prepare("SELECT Count(*) FROM recents WHERE movieID = :id");
+$stmt->execute(['id' => $MovieID]);
+$movie = $stmt->fetch(PDO::FETCH_ASSOC);
+if($movie['Count(*)'] == 0) {
+    $stmt = $pdo->prepare("INSERT INTO recents (movieID) VALUES (:id)");
+    $stmt->execute(['id' => $MovieID]);
+}
+else{
+    // Move the record to the top by deleting and re-inserting it
+    $stmt = $pdo->prepare("DELETE FROM recents WHERE movieID = :id");
+    $stmt->execute(['id' => $MovieID]);
+
+    $stmt = $pdo->prepare("INSERT INTO recents (movieID) VALUES (:id)");
+    $stmt->execute(['id' => $MovieID]);
+}
+
+
 // The html code for the entire page
 echo "<!DOCTYPE html>
 <!DOCTYPE html>

@@ -17,6 +17,7 @@ $year = isset($_GET['year']) ? $_GET['year'] : '';
 $search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
 $orderBy = isset($_GET['orderBy']) ? $_GET['orderBy'] : '';
 $genre = isset($_GET['genre']) ? $_GET['genre'] : '';
+$wantRecents = isset($_GET['wantRecents']) ? $_GET['wantRecents'] : '';
 
 $Command = "";
 
@@ -77,6 +78,11 @@ else if($Command != "") {
     $stmt = $conn->prepare($Command);
     $stmt->bind_param("s", $search);
 }
+else if($wantRecents != "") {
+    // Join recents and links tables to get the most recent movies
+    // Order is in reverse chronological order
+    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id");
+}
 else {
     $stmt = $conn->prepare("SELECT * FROM links WHERE movie_title LIKE ? " . ($orderBy != "" ? "ORDER BY " . $orderBy : ""));
     $stmt->bind_param("s", $search);
@@ -85,6 +91,9 @@ else {
 $stmt->execute();
 $result = $stmt->get_result();
 $movies = $result->fetch_all(MYSQLI_ASSOC);
+if($wantRecents != "") {
+    $movies = array_reverse($movies);
+}
 
 echo json_encode($movies);
 

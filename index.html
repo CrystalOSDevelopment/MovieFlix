@@ -128,17 +128,9 @@
             display: flex;
             flex-direction: column;
             margin-right: 30px;
-        }
-
-        .movieData{
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
             gap: 20px;
-        }
-
-        .movieData > .movie > img{
-            width: 20px;
         }
 
         categories-grid {
@@ -246,7 +238,7 @@
             <div class="menu-item">
                 <a href="index.html" style="text-decoration: none; color: inherit;">Főoldal</a>
             </div>
-            <div class="menu-item">Legutóbbiak</div>
+            <div class="menu-item" id="Recents">Legutóbbiak</div>
             <!-- <div class="menu-item">Kedvencek</div>
             <div class="menu-item">Profilom</div> -->
             <div class="menu-item">Beállítások</div>
@@ -284,7 +276,7 @@
             </div>
             
         </div>
-        <div id="movieData"></div>
+        <div id="movieData" style="margin-left: 80px; margin-top: 40px;"></div>
     </div>
 
     <script>
@@ -298,6 +290,7 @@
             const type = "";
     
             const movieDataDiv = document.getElementById('movieData');
+            movieDataDiv.style.display = 'flex';
             movieDataDiv.innerHTML = '<p>Please wait...</p>';
     
             fetch(`index.php`, {
@@ -340,12 +333,14 @@
 
                         SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
                         SubmovieDiv.style.height = "100%";
+                        SubmovieDiv.style.paddingTop = '40px';
                         
                         movieDiv.addEventListener('click', function() {
                             window.location.href = `VideoPlayer.php?id=${movie.id}`;
                         });
                         movieDiv.appendChild(SubmovieDiv);
                         
+                        movieDataDiv.style.marginTop = '40px';
                         movieDataDiv.appendChild(movieDiv);
                     });
                 })
@@ -354,8 +349,59 @@
             .catch(error => console.error('Error:', error));
         });
     
-        document.getElementById('fetchAllRecords').addEventListener('click', function() {
-            // Your existing code for fetchAllRecords click event
+        document.getElementById('Recents').addEventListener('click', function(event){
+            event.preventDefault();
+            const movieDataDiv = document.getElementById('movieData');
+            // Give it style
+            movieDataDiv.style.display = 'block';
+            movieDataDiv.innerHTML = '<p>Please wait...</p>';
+            fetch(`movies.php?wantRecents=1`)
+            .then(response => response.json())
+            .then(data => {
+                movieDataDiv.innerHTML = '<h2>Legutóbbi filmek</h2>';
+                const UpperDiv = document.createElement('div');
+                data.forEach(movie => {
+                    const movieDiv = document.createElement('div');
+                    movieDiv.classList.add('movie');
+
+                    let cleanedTitle = movie.movie_title.replace(/\(\d{4}\)(\s*\(\d+\))*$/, '');
+                    if (cleanedTitle.length > 40) { 
+                        cleanedTitle = cleanedTitle.substring(0, 17) + '...'; 
+                    }
+
+                    movieDiv.style.backgroundImage = `url(${movie.cover})`;
+                    movieDiv.style.backgroundSize = 'cover';
+                    movieDiv.style.backgroundPosition = 'center';
+                    movieDiv.style.overflow = 'hidden';
+                    
+                    // Create a div
+                    const SubmovieDiv = document.createElement('div');
+                    SubmovieDiv.innerHTML = `
+                        <img src="${movie.cover}" alt="${movie.movie_title} Poster">
+                        <h2>${cleanedTitle}</h2>
+                        <p>${movie.release_date}</p>
+                    `;
+
+                    SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
+                    SubmovieDiv.style.height = "100%";
+                    
+                    movieDiv.addEventListener('click', function() {
+                        window.location.href = `VideoPlayer.php?id=${movie.id}`;
+                    });
+
+                    SubmovieDiv.style.paddingTop = '40px';
+                    movieDiv.appendChild(SubmovieDiv);
+                    
+                    //movieDataDiv.appendChild(movieDiv);
+
+                    UpperDiv.appendChild(movieDiv);
+
+                    UpperDiv.style.id = 'movieData';
+                    movieDataDiv.style.marginTop = '0px';
+                    movieDataDiv.appendChild(UpperDiv);
+                });
+            })
+            .catch(error => console.error('Error:', error));
         });
     </script>
     <script>
