@@ -215,40 +215,6 @@ try {
                             }
                         }
 
-                        // If the movie link is empty, pull it from another source
-                        // if ($ExportLink == "") {
-                        //     $response2 = $httpClient->get("https://mozimix.com/?s=" . $SearchWord);
-                        //     $htmlContent2 = (string) $response2->getBody();
-                        //     libxml_use_internal_errors(true);
-                        //     $domDocument2 = new DOMDocument();
-                        //     $domDocument2->loadHTML($htmlContent2);
-                        //     $xpath2 = new DOMXPath($domDocument2);
-
-                        //     // Debug: Print the HTML string to verify the structure
-                        //     echo "<pre>" . htmlspecialchars($htmlContent2) . "</pre>";
-
-                        //     // Find all the movie titles
-                        //     $movies = $xpath2->evaluate('//div[@id="dt_contenedor"]//div[@id="contenedor"]//div[@class="module"]//div[@class="content rigth csearch"]//div[@class="search-page"]//div[@class="result-item"]//article//div[@class="details"]//div[@class="title"]/a');
-
-                        //     // Write out every movie link
-                        //     foreach ($movies as $index => $movieTitleElement) {
-                        //         $movieLink = $movieTitleElement->getAttribute('href');
-                        //         // Extract inner html
-                        //         $movieName = $movieTitleElement->textContent;
-                        //         if(str_contains($movieTitle, $movieName)){
-                        //             echo 'Adatlap: <a href="' . htmlspecialchars($movieLink) . '">' . htmlspecialchars($movieLink) . '</a><br>';
-                        //             $ExportLink = $movieLink;
-                        //             break;
-                        //         }
-                        //     }
-
-                        //     // Export the video from the new source from the video tag
-                        //     if ($ExportLink !== "") {
-                        //         $ExportLink = exec("node index.js " . escapeshellarg($movieLink));
-                        //         echo 'URL: <a href="' . $ExportLink . '">' . htmlspecialchars($secondDivText) . '</a><br>';
-                        //     }
-                        // }
-
                         if ($imdbCode !== null) {
                             $stmt = $pdo->prepare("INSERT INTO links (movie_title, movie_length, link, release_date, cover, imdb_code, description, Category, Rating, DirANDActors) VALUES (:movie_title, :movie_length, :link, :release_date, :cover, :imdb_code, :description, :Category, :Rating, :DirANDActors)");
                             $stmt->execute([
