@@ -239,6 +239,31 @@ $FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . 
 $OMDBData = json_decode($FetchedOMDBData, true);
 $Film_Korhatar = $OMDBData['Rated'];
 
+
+switch ($Film_Korhatar) {
+    case 'G':
+        $Film_Korhatar_Magyar = '0';
+        break;
+    case 'PG':
+        $Film_Korhatar_Magyar = '6';
+        break;
+    case 'PG-13':
+        $Film_Korhatar_Magyar = '12';
+        break;
+    case 'R':
+        $Film_Korhatar_Magyar = '16';
+        break;
+    case 'NC-17':
+        $Film_Korhatar_Magyar = '18';
+        break;
+    case 'X':
+        $Film_Korhatar_Magyar = 'X';
+        break;
+    default:
+        $Film_Korhatar_Magyar = '1';
+        break;
+}
+
 // The html code for the entire page
 echo "<!DOCTYPE html>
 <!DOCTYPE html>
@@ -640,9 +665,9 @@ echo "<!DOCTYPE html>
                         </div>  
                     
                     <div style=\"display: flex; justify-content: flex-start; align-items: center;\">
-                        <img src=\"https://cdn.siter.io/assets/ast_cSHVq2tCHCdum6h5A4AM6NTSq/3b6eb131-ba57-4e08-9fda-1debe6715a33.webp\"
+                        <img src=\"{$Film_Korhatar_Magyar}.png\"
                             alt=\"Korhatár\" class=\"korhatar\">
-                        <div class=\"film-description\">A műsorszám megtekintése {$Film_Korhatar} éven aluliak számára nem ajánlott.</div>
+                        <div class=\"film-description\">A műsorszám megtekintése {$Film_Korhatar_Magyar} éven aluliak számára nem ajánlott.</div>
                         
                     </div>
                     <div class=\"buttons\">
