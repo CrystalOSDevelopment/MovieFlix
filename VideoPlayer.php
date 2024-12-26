@@ -570,6 +570,16 @@ echo "<!DOCTYPE html>
                 appearance: none;
             }
 
+
+            button.approve {
+                padding: 0;
+                background-color: transparent;
+                border: 0;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+            }
+
             .embed-responsive-item {
                 width: 100%;
                 height: 100%;
@@ -588,30 +598,41 @@ echo "<!DOCTYPE html>
             }
         </style>
     </head>
-    <body>
-        <div class=\"modal fade show\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-modal=\"true\" >
-            <div class=\"modal-dialog\" role=\"document\">
-                <div class=\"modal-content\">
-                    <div class=\"modal-body\">
-
+     <div class=\"modal fade show\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-modal=\"true\">
+        <div class=\"modal-dialog\" role=\"document\">
+            <div class=\"modal-content\">
+                <div class=\"modal-body\">
                     <button type=\"button\" class=\"close\" id=\"closeModalBtn\" data-dismiss=\"modal\" aria-label=\"Close\">
                         <span aria-hidden=\"true\">×</span>
                     </button>
+
+                   <!-- Kérdés: Elindult? Igen/Nem -->
+                    <p style=\"font-size: 18px; color: #333; text-align: center;\">Elindult a film?</p>
+                    <div style=\"display: flex; justify-content: center; gap: 20px;\">
+                        <button type=\"button\" class=\"approve\" id=\"yesBtn\" data-dismiss=\"modal\" aria-label=\"Close\" style=\"background-color: #28a745; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;\">
+                            Igen
+                        </button>
+                        <button type=\"button\" class=\"approve\" id=\"noBtn\" data-dismiss=\"modal\" aria-label=\"Close\" style=\"background-color: #dc3545; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;\">
+                            Nem
+                        </button>
+                    </div>
+
                     <!-- 16:9 aspect ratio -->
-                        <div class=\"videoiframe\">
-                                ";
-                                if (strpos($Film_Link, 'm3u8') !== false) {
-                                    echo "<video-js style=\"width: 100%; height: 100%;\" id=\"my-video\" class=\"video-js vjs-default-skin embed-responsive-item\" controls preload=\"auto\" width=\"80%\" height=\"80%\" data-setup='{}'>
-                                    <source src=\"{$Film_Link}\" type=\"application/x-mpegURL\">
-                                    </video-js>";
-                                } else {
-                                    echo "<iframe src=\"{$Film_Link}\" class=\"embed-responsive-item\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>";
-                                }
-            echo "       </div>
+                    <div class=\"videoiframe\">
+                        ";
+                        if (strpos($Film_Link, 'm3u8') !== false) {
+                            echo "<video-js style=\"width: 100%; height: 100%;\" id=\"my-video\" class=\"video-js vjs-default-skin embed-responsive-item\" controls preload=\"auto\" width=\"80%\" height=\"80%\" data-setup='{}'>
+                            <source src=\"{$Film_Link}\" type=\"application/x-mpegURL\">
+                            </video-js>";
+                        } else {
+                            echo "<iframe src=\"{$Film_Link}\" class=\"embed-responsive-item\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>";
+                        }
+                        echo "
                     </div>
                 </div>
             </div>
         </div>
+    </div>
         <div class=\"page-content\">
             <div class=\"background\"></div>
             <div class=\"header\">
