@@ -45,7 +45,13 @@
         .menu-item:hover {
             color: #1e90ff;
         }
-        
+
+        .filmhossz {
+            /* margin-top: 3px; */
+            top: 0px;
+            position: absolute;
+            right: 20px;
+        }
         .Search{
             background-color: rgba(217, 217, 217, 0.5);
             border-radius: 31.5px;
@@ -276,7 +282,7 @@
             </div>
             
         </div>
-        <div id="movieData" style="margin-left: 80px; margin-top: 40px;"></div>
+        <div id="movieData" style="margin-left: 80px; margin-top: 40px;display: flex; flex-wrap: wrap;flex-direction: row;"></div>
     </div>
 
     <script>
@@ -328,6 +334,7 @@
                         SubmovieDiv.innerHTML = `
                             <img src="${movie.cover}" alt="${movie.movie_title} Poster">
                             <h2>${cleanedTitle}</h2>
+                            <p class="filmhossz">${movie.movie_length} perc</p>
                             <p>${movie.release_date}</p>
                         `;
 
@@ -379,6 +386,7 @@
                     SubmovieDiv.innerHTML = `
                         <img src="${movie.cover}" alt="${movie.movie_title} Poster">
                         <h2>${cleanedTitle}</h2>
+                        
                         <p>${movie.release_date}</p>
                     `;
 
