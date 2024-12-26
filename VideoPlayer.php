@@ -21,6 +21,7 @@ $Film_Megjelenes = "";
 $Film_Link = "";
 $Film_leiras = "";
 $Film_Kedvenc = false;
+$Film_Korhatar = "";
 
 if ($MovieID) {
     try {
@@ -55,19 +56,35 @@ if ($MovieID) {
             $imdbLink = $IMDB_BaseLink . "/title/" . str_replace(" ", "+", $IMDBCode);
             //echo "<br><a href=\"" . $imdbLink . "\">IMDB Link</a>";
 
-
+            $NeedsUpdate = false;
             // Check if the database has a record for the trailer link
             $stmt2 = $pdo->prepare("SELECT Count(*) FROM trailers WHERE imdb_id = :id");
             $stmt2->execute(['id' => $IMDBCode]);
             $movie2 = $stmt2->fetch(PDO::FETCH_ASSOC);
 
+            // If the record exists, fetch the trailer link
             if ($movie2['Count(*)'] > 0) {
-                $stmt2 = $pdo->prepare("SELECT * FROM trailers WHERE imdb_id = :id");
+                // Check if the record is over 12 hours old
+                $stmt2 = $pdo->prepare("SELECT RecordTime FROM trailers WHERE imdb_id = :id");
                 $stmt2->execute(['id' => $IMDBCode]);
                 $movie2 = $stmt2->fetch(PDO::FETCH_ASSOC);
-                $IMDB_Elozetes = $movie2['trailer_link'];
-                //echo "<br><a href=\"" . $movie2['trailer_link'] . "\">Direct IMDB link</a>" . "<br>";
-                //echo "<video src=\"" . htmlspecialchars($movie2['trailer_link']) . "\" width=\"320\" height=\"240\" controls>" . PHP_EOL;
+
+                $RecordTime = $movie2['RecordTime'];
+                $RecordTime = strtotime($RecordTime);
+                $CurrentTime = time();
+                $Difference = $CurrentTime - $RecordTime;
+
+                // If the record is over 12 hours old, update it
+                if ($Difference > 43200) {
+                    $NeedsUpdate = true;
+                }
+                else{
+                    $stmt2 = $pdo->prepare("SELECT * FROM trailers WHERE imdb_id = :id");
+                    $stmt2->execute(['id' => $IMDBCode]);
+                    $movie2 = $stmt2->fetch(PDO::FETCH_ASSOC);
+                    $IMDB_Elozetes = $movie2['trailer_link'];
+                    $Film_Link = $movie2['link'];
+                }
             } else {
                 // If no trailer is found in the database, fetch the trailer link
                 $httpClient = new Client([
@@ -76,7 +93,7 @@ if ($MovieID) {
                     ]
                 ]);
 
-                $response = $httpClient->get($IMDB_BaseLink . "/title/" . str_replace(" ", "+", $movie['imdb_code']));
+                $response = $httpClient->get($IMDB_BaseLink . "/title/" . str_replace(" ", "+", $IMDBCode));
                 $htmlString = (string) $response->getBody();
                 libxml_use_internal_errors(true);
                 $doc = new DOMDocument();
@@ -109,54 +126,38 @@ if ($MovieID) {
                 exec("node $script " . escapeshellarg($IMDBVideoURL), $output, $returnVar);
 
                 if ($returnVar === 0) {
-                    $videoTags = json_decode(implode('', $output), true);
-                    if (!empty($videoTags)) {
-                        foreach ($videoTags as $videoTag) {
-                            //echo "<video src=\"" . htmlspecialchars($videoTag) . "\" width=\"320\" height=\"240\" controls autoplay>" . PHP_EOL;
-
-                            // Insert the trailer link into the trailers table
-                            $stmt2 = $pdo->prepare("INSERT INTO trailers (imdb_id, trailer_link) VALUES (:imdb_id, :trailer_link)");
-                            $stmt2->execute([
-                                'imdb_id' => $movie['imdb_code'],  // Using movie IMDB code
-                                'trailer_link' =>  $videoTag       // The trailer URL extracted
-                            ]);
-                            $IMDB_Elozetes = $videoTag;
-
-                            // Check if the record was inserted successfully
-                            if ($stmt2->rowCount() > 0) {
-                                //echo "Trailer link successfully inserted for IMDB code " . $movie['imdb_code'];
-                            } else {
-                                //echo "Error inserting trailer link for IMDB code " . $movie['imdb_code'];
-                            }
-
-                            break;  // Insert only one record per movie
-                        }
-                    } else {
-                        echo "No video tags found.";
-                    }
+                    $IMDB_Elozetes = $output[0];
+                    $stmt2 = $pdo->prepare("INSERT INTO trailers (imdb_id, trailer_link, RecordTime) VALUES (:imdb_id, :trailer_link, CURRENT_TIMESTAMP)");
+                    $stmt2->execute([
+                        'imdb_id' => $IMDBCode,  // Using movie IMDB code
+                        'trailer_link' =>  $IMDB_Elozetes       // The trailer URL extracted
+                    ]);
+                    $NeedsUpdate = true;
                 } else {
                     echo "<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var footer = document.createElement('div');
-            footer.style.position = 'fixed';
-            footer.style.bottom = '0';
-            footer.style.left = '0';
-            footer.style.width = '100%';
-            footer.style.backgroundColor = '#121212';
-            footer.style.color = 'red';
-            footer.style.padding = '10px';
-            footer.style.textAlign = 'center';
-            footer.innerText = 'Hiba történt a Puppeteer script futtatásakor.';
-            document.body.appendChild(footer);
-        });
-    </script>";
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var footer = document.createElement('div');
+                        footer.style.position = 'fixed';
+                        footer.style.bottom = '0';
+                        footer.style.left = '0';
+                        footer.style.width = '100%';
+                        footer.style.backgroundColor = '#121212';
+                        footer.style.color = 'red';
+                        footer.style.padding = '10px';
+                        footer.style.textAlign = 'center';
+                        footer.innerText = 'Hiba történt a Puppeteer script futtatásakor.';
+                        document.body.appendChild(footer);
+                    });
+                </script>";
                 }
+
+                $NeedsUpdate = true;
             }
 
         }
 
         // If no movies found, pull it from mozimix.com
-        if ($Film_Link == "") {
+        if ($Film_Link == "" && $NeedsUpdate) {
             // Remove every date from the movie title
             $Film_Cim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
             // Remove dots from the end of the movie title
@@ -184,7 +185,7 @@ if ($MovieID) {
                 $cleanedFilmCim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
                 $cleanedFilmCim = preg_replace('/\.*$/', '', $cleanedFilmCim);
                 $cleanedFilmCim = trim($cleanedFilmCim);
-            
+                
                 // Case-insensitive comparison
                 if (strcasecmp($cleanedFilmCim, $movieName) == 0) {
                     $ExportLink = $movieLink;
@@ -195,9 +196,16 @@ if ($MovieID) {
 
             // Export the video from the new source from the video tag
             if ($ExportLink !== "") {
-                $ExportLink = exec("node index.js " . escapeshellarg($movieLink));
+                $ExportLink = exec("node index.js " . escapeshellarg($BestLink));
                 $Film_Link = $ExportLink;
             }
+
+            // Update the trailer link in the database with the new link
+            $stmt2 = $pdo->prepare("UPDATE trailers SET link = :link, RecordTime = CURRENT_TIMESTAMP WHERE imdb_id = :id");
+            $stmt2->execute([
+                'link' => $Film_Link,
+                'id' => $IMDBCode
+            ]);
         }
 
     } catch (PDOException $e) {
@@ -225,6 +233,11 @@ else{
     $stmt->execute(['id' => $MovieID]);
 }
 
+// Age limit from OMDB. Can be placed in index.php
+$apikey = ""; // Your OMDB API key here
+$FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . "&apikey=" . $apikey);
+$OMDBData = json_decode($FetchedOMDBData, true);
+$Film_Korhatar = $OMDBData['Rated'];
 
 // The html code for the entire page
 echo "<!DOCTYPE html>
@@ -588,9 +601,14 @@ echo "<!DOCTYPE html>
                     <div class=\"menu-item\">Beállítások</div>
                 </div>
             </div>
-            <div class=\"video-player\">
-                <video id=\"trailer\" autoplay muted loop playsinline src=\"{$IMDB_Elozetes}\" style=\"max-width: 100%\"></video>
-                <div id=\"no-trailer-message\" style=\"display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.8); color: white; padding: 20px; font-size: 35px; border-radius: 10px; text-align: center;\">Nincs elérhető előzetes</div>
+            <div class=\"video-player\">";
+                if ($IMDB_Elozetes == "") {
+                    echo "<div id=\"no-trailer-message\" style=\"display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.8); color: white; padding: 20px; font-size: 35px; border-radius: 10px; text-align: center;\">Nincs elérhető előzetes</div>";
+                }
+                else{
+                    echo "<video autoplay muted loop playsinline src=\"{$IMDB_Elozetes}\" style=\"max-width: 100%;\"></video>";
+                }
+                echo "
             </div>
             <div class=\"bottom-bar\">
                 <div class=\"poster-frame\">
@@ -624,7 +642,7 @@ echo "<!DOCTYPE html>
                     <div style=\"display: flex; justify-content: flex-start; align-items: center;\">
                         <img src=\"https://cdn.siter.io/assets/ast_cSHVq2tCHCdum6h5A4AM6NTSq/3b6eb131-ba57-4e08-9fda-1debe6715a33.webp\"
                             alt=\"Korhatár\" class=\"korhatar\">
-                        <div class=\"film-description\">A műsorszám megtekintése 16 éven aluliak számára nem ajánlott.</div>
+                        <div class=\"film-description\">A műsorszám megtekintése {$Film_Korhatar} éven aluliak számára nem ajánlott.</div>
                         
                     </div>
                     <div class=\"buttons\">
