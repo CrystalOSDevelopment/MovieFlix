@@ -18,7 +18,7 @@ $search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
 $orderBy = isset($_GET['orderBy']) ? $_GET['orderBy'] : '';
 $genre = isset($_GET['genre']) ? $_GET['genre'] : '';
 $wantRecents = isset($_GET['wantRecents']) ? $_GET['wantRecents'] : '';
-$addtoFavorites = isset($_GET['addtoFavorites']) ? $_GET['addtoFavorites'] : '2006';
+$addtoFavorites = isset($_GET['addtoFavorites']) ? $_GET['addtoFavorites'] : '';
 
 $Command = "";
 

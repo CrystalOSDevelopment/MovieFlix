@@ -20,6 +20,7 @@ $Film_Hossz = "";
 $Film_Megjelenes = "";
 $Film_Link = "";
 $Film_leiras = "";
+$Film_Kedvenc = false;
 
 if ($MovieID) {
     try {
@@ -39,13 +40,21 @@ if ($MovieID) {
             $Film_Megjelenes = $movie['release_date'];
             $Film_Link = $movie['link'];
             $Film_leiras = $movie['description'];
+            $IMDBCode = $movie['imdb_code'];
+
+            // Check if the movie is in the favorites table
+            $stmt = $pdo->prepare("SELECT Count(*) FROM favorites WHERE movieID = :id");
+            $stmt->execute(['id' => $MovieID]);
+            $movie = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($movie['Count(*)'] > 0) {
+                $Film_Kedvenc = true;
+            }
 
             // Trace back the IMDB data
             $IMDB_BaseLink = "https://www.imdb.com";
-            $imdbLink = $IMDB_BaseLink . "/title/" . str_replace(" ", "+", $movie['imdb_code']);
+            $imdbLink = $IMDB_BaseLink . "/title/" . str_replace(" ", "+", $IMDBCode);
             //echo "<br><a href=\"" . $imdbLink . "\">IMDB Link</a>";
 
-            $IMDBCode = $movie['imdb_code'];
 
             // Check if the database has a record for the trailer link
             $stmt2 = $pdo->prepare("SELECT Count(*) FROM trailers WHERE imdb_id = :id");
@@ -587,7 +596,7 @@ echo "<!DOCTYPE html>
                     <div class=\"buttons\">
                         <button class=\"button button-watch\" id=\"openModalBtn\">Megtekintem</button>
                         <button class=\"button button\" onclick=\"window.location.href=\'' . $IMDB_Elozetes . '\'\">Előzetes megtekintése</button>
-                        <button class=\"button button-add\" id=\"AddtoFavorites\">Listához adás</button>
+                        <button class=\"button button-add\" id=\"AddtoFavorites\">"; echo $Film_Kedvenc? "Hozzáadva kedvencekhez" : "Kedvencekhez adás"; echo "</button>
                     </div>
                     <script>
                     // Modal elem és gombok referenciája
