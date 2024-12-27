@@ -74,8 +74,8 @@ if ($MovieID) {
                 $CurrentTime = time();
                 $Difference = $CurrentTime - $RecordTime;
 
-                // If the record is over 12 hours old, update it
-                if ($Difference > 43200) {
+                // If the record is over 2 hours old, update it
+                if ($Difference > 7200) {
                     $NeedsUpdate = true;
                 }
                 else{
@@ -234,7 +234,7 @@ else{
 }
 
 // Age limit from OMDB. Can be placed in index.php
-$apikey = "37daa229"; // Your OMDB API key here
+$apikey = ""; // Your OMDB API key here
 $FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . "&apikey=" . $apikey);
 $OMDBData = json_decode($FetchedOMDBData, true);
 $Film_Korhatar = $OMDBData['Rated'];
@@ -606,15 +606,17 @@ echo "<!DOCTYPE html>
                         <span aria-hidden=\"true\">×</span>
                     </button>
 
-                   <!-- Kérdés: Elindult? Igen/Nem -->
-                    <p style=\"font-size: 18px; color: #333; text-align: center;\">Elindult a film?</p>
-                    <div style=\"display: flex; justify-content: center; gap: 20px;\">
-                        <button type=\"button\" class=\"approve\" id=\"yesBtn\" data-dismiss=\"modal\" aria-label=\"Close\" style=\"background-color: #28a745; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;\">
-                            Igen
-                        </button>
-                        <button type=\"button\" class=\"approve\" id=\"noBtn\" data-dismiss=\"modal\" aria-label=\"Close\" style=\"background-color: #dc3545; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;\">
-                            Nem
-                        </button>
+                    <!-- Kérdés: Elindult? Igen/Nem -->
+                    <div class=\"Question\">
+                        <p style=\"font-size: 18px; color: #333; text-align: center;\">Elindult a film?</p>
+                        <div style=\"display: flex; justify-content: center; gap: 20px;\">
+                            <button type=\"button\" class=\"approve\" id=\"yesBtn\" data-dismiss=\"modal\" aria-label=\"Close\" style=\"background-color: #28a745; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;\">
+                                Igen
+                            </button>
+                            <button type=\"button\" class=\"approve\" id=\"noBtn\" data-dismiss=\"modal\" aria-label=\"Close\" style=\"background-color: #dc3545; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;\">
+                                Nem
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 16:9 aspect ratio -->
@@ -784,6 +786,30 @@ echo "<!DOCTYPE html>
                     }
                 };
                 xhr.send();
+            });
+        </script>
+
+        <script>
+            // Action on yes button click
+            document.getElementById('yesBtn').addEventListener('click', function() {
+                const que = document.getElementsByClassName('Question')[0];
+                que.style.display = 'none';
+            });
+            // Action on no button click
+            document.getElementById('noBtn').addEventListener('click', function() {
+                // Delete every record from every table related to the movie id
+                var movieID = {$MovieID}; // Make sure `$MovieID` is properly embedded
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'movies.php?deleteMovie=' + movieID, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        const response = xhr.responseText.trim();
+                        if (response === 'true') {
+                            window.location.href = 'index.html';
+                        }
+                    }
+                };
+                xhr.send(); // This is crucial to send the request
             });
         </script>
     </body>

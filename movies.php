@@ -19,6 +19,7 @@ $orderBy = isset($_GET['orderBy']) ? $_GET['orderBy'] : '';
 $genre = isset($_GET['genre']) ? $_GET['genre'] : '';
 $wantRecents = isset($_GET['wantRecents']) ? $_GET['wantRecents'] : '';
 $addtoFavorites = isset($_GET['addtoFavorites']) ? $_GET['addtoFavorites'] : '';
+$deleteMovie = isset($_GET['deleteMovie']) ? $_GET['deleteMovie'] : ''; // This is an movieID
 
 $Command = "";
 
@@ -107,6 +108,39 @@ else if($addtoFavorites != "") {
         $stmt->execute();
         echo "false";
     }
+    $stmt->close();
+    $conn->close();
+    return;
+}
+else if($deleteMovie != "") {
+    // Delete the movie from the favorites table
+    $stmt = $conn->prepare("DELETE FROM favorites WHERE movieID = ?");
+    $stmt->bind_param("i", $deleteMovie);
+    $stmt->execute();
+
+    // Delete the movie from the recents table
+    $stmt = $conn->prepare("DELETE FROM recents WHERE movieID = ?");
+    $stmt->bind_param("i", $deleteMovie);
+    $stmt->execute();
+
+    // Before deleting from the links table, we need to get the imdbID
+    $stmt = $conn->prepare("SELECT imdb_code FROM links WHERE id = ?");
+    $stmt->bind_param("i", $deleteMovie);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $imdbID = $result->fetch_all(MYSQLI_ASSOC)[0]['imdb_code'];
+
+    // Delete the movie from the links table
+    $stmt = $conn->prepare("DELETE FROM links WHERE id = ?");
+    $stmt->bind_param("i", $deleteMovie);
+    $stmt->execute();
+
+    // Delete the movie from the trailers table
+    $stmt = $conn->prepare("DELETE FROM trailers WHERE imdb_id = ?");
+    $stmt->bind_param("i", $imdbID);
+    $stmt->execute();
+
+    echo "true";
     $stmt->close();
     $conn->close();
     return;
