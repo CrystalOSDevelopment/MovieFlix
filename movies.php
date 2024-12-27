@@ -20,6 +20,7 @@ $genre = isset($_GET['genre']) ? $_GET['genre'] : '';
 $wantRecents = isset($_GET['wantRecents']) ? $_GET['wantRecents'] : '';
 $addtoFavorites = isset($_GET['addtoFavorites']) ? $_GET['addtoFavorites'] : '';
 $deleteMovie = isset($_GET['deleteMovie']) ? $_GET['deleteMovie'] : ''; // This is an movieID
+$wantFavorites = isset($_GET['wantFavorites']) ? $_GET['wantFavorites'] : '';
 
 $Command = "";
 
@@ -144,6 +145,10 @@ else if($deleteMovie != "") {
     $stmt->close();
     $conn->close();
     return;
+}
+else if($wantFavorites != "") {
+    // Join favorites and links tables to get the favorite movies
+    $stmt = $conn->prepare("SELECT * FROM favorites JOIN links ON favorites.movieID = links.id");
 }
 else {
     $stmt = $conn->prepare("SELECT * FROM links WHERE movie_title LIKE ? " . ($orderBy != "" ? "ORDER BY " . $orderBy : ""));

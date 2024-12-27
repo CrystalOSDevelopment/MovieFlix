@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Search</title>
     <link rel="stylesheet" href="index.css">
+    <script src="homepage.js"></script>
+    <!-- Read parameters if any is passed -->
     <style>
         body{
             background-image: linear-gradient(-120deg, #101010 55%, #6FBAFF 100%);
@@ -245,8 +247,8 @@
                 <a href="index.html" style="text-decoration: none; color: inherit;">Főoldal</a>
             </div>
             <div class="menu-item" id="Recents">Legutóbbiak</div>
-            <!-- <div class="menu-item">Kedvencek</div>
-            <div class="menu-item">Profilom</div> -->
+            <div class="menu-item" id="Favorites">Kedvencek</div>
+            <!-- <div class="menu-item">Profilom</div> -->
             <div class="menu-item">Beállítások</div>
         </div>
     </div>
@@ -286,130 +288,19 @@
     </div>
 
     <script>
-        document.getElementById('searchForm').addEventListener('submit', function(event) {
+        document.getElementById('searchForm').addEventListener('submit', function(event) { // Change submit to click and it'll do real time search (tinkering with the code is needed to it tho)
             event.preventDefault();
-            //const year = document.getElementById('year').value;
-            const searchTerm = document.getElementById('SearchTerm').value;
-            //const type = document.getElementById('type').value;
-
-            const year = 0;
-            const type = "";
-    
-            const movieDataDiv = document.getElementById('movieData');
-            movieDataDiv.style.display = 'grid';
-            movieDataDiv.innerHTML = '<p>Please wait...</p>';
-    
-            fetch(`index.php`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `year=${year}&search=${searchTerm}&type=${type}`
-            })
-            .then(response => response.text())
-            .then(() => {
-                //Get all the Option elements nad find the index of the first selected option
-                const selectedOption = Array.from(document.querySelectorAll('.Option')).findIndex(option => option.style.backgroundColor != 'transparent');
-                console.log(selectedOption);
-                fetch(`movies.php?year=${searchTerm.trim() != "" ? "" : year}&search=${searchTerm.trim()}&orderBy=` + selectedOption)
-                .then(response => response.json())
-                .then(data => {
-                    movieDataDiv.innerHTML = '';
-                    data.forEach(movie => {
-                        const movieDiv = document.createElement('div');
-                        movieDiv.classList.add('movie');
-
-                        let cleanedTitle = movie.movie_title.replace(/\(\d{4}\)(\s*\(\d+\))*$/, '');
-                        if (cleanedTitle.length > 40) { 
-                            cleanedTitle = cleanedTitle.substring(0, 17) + '...'; 
-                        }
-
-                        movieDiv.style.backgroundImage = `url(${movie.cover})`;
-                        movieDiv.style.backgroundSize = 'cover';
-                        movieDiv.style.backgroundPosition = 'center';
-                        movieDiv.style.overflow = 'hidden';
-                        
-                        // Create a div
-                        const SubmovieDiv = document.createElement('div');
-                        SubmovieDiv.innerHTML = `
-                            <img src="${movie.cover}" alt="${movie.movie_title} Poster">
-                            <h2>${cleanedTitle}</h2>
-                            <p class="filmhossz">${movie.movie_length} perc</p>
-                            <p>${movie.release_date}</p>
-                        `;
-
-                        SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
-                        SubmovieDiv.style.height = "100%";
-                        SubmovieDiv.style.paddingTop = '40px';
-                        
-                        movieDiv.addEventListener('click', function() {
-                            window.location.href = `VideoPlayer.php?id=${movie.id}`;
-                        });
-                        movieDiv.appendChild(SubmovieDiv);
-                        
-                        movieDataDiv.style.marginTop = '40px';
-                        movieDataDiv.appendChild(movieDiv);
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-            })
-            .catch(error => console.error('Error:', error));
+            Search(event);
         });
     
         document.getElementById('Recents').addEventListener('click', function(event){
             event.preventDefault();
-            const movieDataDiv = document.getElementById('movieData');
-            // Give it style
-            movieDataDiv.style.display = 'block';
-            movieDataDiv.innerHTML = '<p>Please wait...</p>';
-            fetch(`movies.php?wantRecents=1`)
-            .then(response => response.json())
-            .then(data => {
-                movieDataDiv.innerHTML = '<h2>Legutóbbi filmek</h2>';
-                const UpperDiv = document.createElement('div');
-                data.forEach(movie => {
-                    const movieDiv = document.createElement('div');
-                    movieDiv.classList.add('movie');
+            Recents(event);
+        });
 
-                    let cleanedTitle = movie.movie_title.replace(/\(\d{4}\)(\s*\(\d+\))*$/, '');
-                    if (cleanedTitle.length > 40) { 
-                        cleanedTitle = cleanedTitle.substring(0, 17) + '...'; 
-                    }
-
-                    movieDiv.style.backgroundImage = `url(${movie.cover})`;
-                    movieDiv.style.backgroundSize = 'cover';
-                    movieDiv.style.backgroundPosition = 'center';
-                    movieDiv.style.overflow = 'hidden';
-                    
-                    // Create a div
-                    const SubmovieDiv = document.createElement('div');
-                    SubmovieDiv.innerHTML = `
-                        <img src="${movie.cover}" alt="${movie.movie_title} Poster">
-                        <h2>${cleanedTitle}</h2>
-                        
-                        <p>${movie.release_date}</p>
-                    `;
-
-                    SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
-                    SubmovieDiv.style.height = "100%";
-                    
-                    movieDiv.addEventListener('click', function() {
-                        window.location.href = `VideoPlayer.php?id=${movie.id}`;
-                    });
-
-                    SubmovieDiv.style.paddingTop = '40px';
-                    movieDiv.appendChild(SubmovieDiv);
-                    
-                    //movieDataDiv.appendChild(movieDiv);
-
-                    UpperDiv.appendChild(movieDiv);
-
-                    UpperDiv.style.id = 'movieData';
-                    movieDataDiv.style.marginTop = '0px';
-                    movieDataDiv.appendChild(UpperDiv);
-                });
-            })
-            .catch(error => console.error('Error:', error));
+        document.getElementById('Favorites').addEventListener('click', function(event){
+            event.preventDefault();
+            Favorites(event);
         });
     </script>
     <script>
@@ -435,6 +326,20 @@
             });
         }
 
+    </script>
+
+    <!-- This is where potential data reception via url goes -->
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        switch(params.get('Page')) {
+            case 'Recents':
+                Recents(event);
+                break;
+            case 'Favorites':
+                Favorites(event);
+            default:
+                break;
+        }
     </script>
 </body>
 </html>

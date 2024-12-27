@@ -290,44 +290,44 @@ echo "<!DOCTYPE html>
                 width: auto;
                 height: 100vh;
             }
-        .player-feature-badge {
-            border: 1px solid #ffffff;
-            border-radius: 3px;
-            color: hsla(0, 0%, 100%, .9);
-            font-size: .7em;
-            padding: 0 .5em;
-            white-space: nowrap;
-            position: relative; /* A belső span pozícionálásához */
-            display: inline-block;
-            transition: padding 0.3s ease; /* Sima átmenet a badge méretnövekedésére */
-        }
+            .player-feature-badge {
+                border: 1px solid #ffffff;
+                border-radius: 3px;
+                color: hsla(0, 0%, 100%, .9);
+                font-size: .7em;
+                padding: 0 .5em;
+                white-space: nowrap;
+                position: relative; /* A belső span pozícionálásához */
+                display: inline-block;
+                transition: padding 0.3s ease; /* Sima átmenet a badge méretnövekedésére */
+            }
 
-        .player-feature-badge:hover {
-            padding: 0 1.5em; /* Kinagyítja a badge-t */
-        }
+            .player-feature-badge:hover {
+                padding: 0 1.5em; /* Kinagyítja a badge-t */
+            }
 
-        .hover-text {
-            position: absolute;
-            left: 50%;
-            bottom: -1.5em; /* Az elem alatt jelenik meg */
-            transform: translateX(-50%);
-            background-color: #333;
-            color: #fff;
-            font-size: 0.7em;
-            padding: 5px 10px;
-            border-radius: 5px;
-            opacity: 0; /* Kezdetben láthatatlan */
-            visibility: hidden;
-            white-space: nowrap;
-            transition: opacity 0.3s ease, transform 0.3s ease; /* Animáció simítása */
-            z-index: 10;
-        }
+            .hover-text {
+                position: absolute;
+                left: 50%;
+                bottom: -1.5em; /* Az elem alatt jelenik meg */
+                transform: translateX(-50%);
+                background-color: #333;
+                color: #fff;
+                font-size: 0.7em;
+                padding: 5px 10px;
+                border-radius: 5px;
+                opacity: 0; /* Kezdetben láthatatlan */
+                visibility: hidden;
+                white-space: nowrap;
+                transition: opacity 0.3s ease, transform 0.3s ease; /* Animáció simítása */
+                z-index: 10;
+            }
 
-        .player-feature-badge:hover .hover-text {
-            opacity: 1; /* Láthatóvá válik */
-            visibility: visible;
-            transform: translateX(-50%) translateY(-5px); /* Finom mozgás felfelé */
-        }
+            .player-feature-badge:hover .hover-text {
+                opacity: 1; /* Láthatóvá válik */
+                visibility: visible;
+                transform: translateX(-50%) translateY(-5px); /* Finom mozgás felfelé */
+            }
 
             .background {
                 position: absolute;
@@ -422,8 +422,7 @@ echo "<!DOCTYPE html>
                 bottom: 10px; /* Görgetéskor megjelenik az oldal alján */
             }
             .bottom-bar .content {
-                display: flex
-            ;
+                display: flex;
                 margin-left: 20px;
                 padding: 20px;
                 flex-direction: column;
@@ -532,7 +531,6 @@ echo "<!DOCTYPE html>
 
             .modal-content {
                 position: relative;
-            ;
                 -ms-flex-direction: column;
                 flex-direction: column;
                 width: 100%;
@@ -546,13 +544,13 @@ echo "<!DOCTYPE html>
             }
 
             .modal-dialog {
-            max-width: 800px;
-            margin: 30px auto;
+                max-width: 800px;
+                margin: 30px auto;
             }
 
             .modal-body {
-            position: relative;
-            padding: 0px;
+                position: relative;
+                padding: 0px;
             }
 
             .fade {
@@ -587,14 +585,14 @@ echo "<!DOCTYPE html>
             }	
 
             .close {
-            position: absolute;
-            right: -30px;
-            top: 0;
-            z-index: 999;
-            font-size: 2rem;
-            font-weight: normal;
-            color: #fff;
-            opacity: 1;
+                position: absolute;
+                right: -30px;
+                top: 0;
+                z-index: 999;
+                font-size: 2rem;
+                font-weight: normal;
+                color: #fff;
+                opacity: 1;
             }
         </style>
     </head>
@@ -643,8 +641,12 @@ echo "<!DOCTYPE html>
                     <div class=\"menu-item\">
                         <a href=\"index.html\" style=\"text-decoration: none; color: inherit;\">Főoldal</a>
                     </div>
-                    <div class=\"menu-item\">Legutóbbiak</div>
-                    <div class=\"menu-item\">Kedvencek</div>
+                    <div class=\"menu-item\">
+                        <a href=\"index.html?Page=Recents\" style=\"text-decoration: none; color: inherit;\">Legutóbbiak</a>
+                    </div>
+                    <div class=\"menu-item\">
+                        <a href=\"index.html?Page=Favorites\" style=\"text-decoration: none; color: inherit;\">Kedvencek</a>
+                    </div>
                     <div class=\"menu-item\">Profilom</div>
                     <div class=\"menu-item\">Beállítások</div>
                 </div>
