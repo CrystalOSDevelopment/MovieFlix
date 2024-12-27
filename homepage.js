@@ -50,7 +50,7 @@ function Search(event) {
                 SubmovieDiv.innerHTML = `
                     <img src="${movie.cover}" alt="${movie.movie_title} Poster">
                     <h2>${cleanedTitle}</h2>
-                    
+                    <p class="filmhossz">${movie.movie_length} perc</p>
                     <p>${movie.release_date}</p>
                 `;
     
@@ -108,7 +108,7 @@ function Recents(event){
             SubmovieDiv.innerHTML = `
                 <img src="${movie.cover}" alt="${movie.movie_title} Poster">
                 <h2>${cleanedTitle}</h2>
-                
+                <p class="filmhossz">${movie.movie_length} perc</p>
                 <p>${movie.release_date}</p>
             `;
 
@@ -164,7 +164,7 @@ function Favorites(event){
             SubmovieDiv.innerHTML = `
                 <img src="${movie.cover}" alt="${movie.movie_title} Poster">
                 <h2>${cleanedTitle}</h2>
-                
+                <p class="filmhossz">${movie.movie_length} perc</p>
                 <p>${movie.release_date}</p>
             `;
 
