@@ -601,8 +601,47 @@ echo "<!DOCTYPE html>
                 color: #fff;
                 opacity: 1;
             }
+
+            /* Loader teljes képernyőn */
+            #loader {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #1a1a1a75;
+                backdrop-filter: blur(20px);
+                
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+
+            /* Spinner animáció betöltés előtt */
+            .spinner {
+                width: 50px;
+                height: 50px;
+                border: 6px solid #555555;
+                border-top: 6px solid #ff0000;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            /* Forgó animáció */
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
         </style>
     </head>
+    <body>
+    <div id=\"loader\"><div class=\"spinner\"></div></div>
      <div class=\"modal fade show\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-modal=\"true\">
         <div class=\"modal-dialog\" role=\"document\">
             <div class=\"modal-content\">
@@ -745,7 +784,7 @@ echo "<!DOCTYPE html>
                 </div>
             </div>
         </div>
-            
+        </body>    
         <script src=\"https://vjs.zencdn.net/7.11.4/video.min.js\"></script>
         <script>
             const bottomBar = document.querySelector(\".bottom-bar\");
@@ -821,6 +860,23 @@ echo "<!DOCTYPE html>
                 xhr.send(); // This is crucial to send the request
             });
         </script>
+        <script>
+            document.onreadystatechange = function () {
+                if (document.readyState !== \"complete\") {
+                    document.querySelector(
+                        \"body\").style.visibility = \"visible\";
+                    document.querySelector(
+                        \"#loader\").style.visibility = \"visible\";
+                } else {
+                    document.querySelector(
+                        \"#loader\").style.display = \"none\";
+                    document.querySelector(
+                        \"body\").style.visibility = \"visible\";
+                }
+            };
+
+
+    </script>
     </body>
 </html>";
 ?>

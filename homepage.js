@@ -9,7 +9,7 @@ function Search(event) {
 
     const movieDataDiv = document.getElementById('movieData');
     movieDataDiv.style.display = 'block';
-    movieDataDiv.innerHTML = '<p>Please wait...</p>';
+    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
 
     fetch(`index.php`, {
         method: 'POST',
@@ -63,6 +63,7 @@ function Search(event) {
                 SubmovieDiv.style.height = "100%";
                 
                 movieDiv.addEventListener('click', function() {
+                    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
                     window.location.href = `VideoPlayer.php?id=${movie.id}`;
                 });
     
@@ -88,7 +89,7 @@ function Recents(event){
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
     movieDataDiv.style.display = 'block';
-    movieDataDiv.innerHTML = '<p>Please wait...</p>';
+    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
     fetch(`movies.php?wantRecents=1`)
     .then(response => response.json())
     .then(data => {
@@ -125,6 +126,7 @@ function Recents(event){
             SubmovieDiv.style.height = "100%";
             
             movieDiv.addEventListener('click', function() {
+                movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
                 window.location.href = `VideoPlayer.php?id=${movie.id}`;
             });
 
@@ -148,7 +150,7 @@ function Favorites(event){
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
     movieDataDiv.style.display = 'block';
-    movieDataDiv.innerHTML = '<p>Please wait...</p>';
+    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
     fetch(`movies.php?wantFavorites=1`)
     .then(response => response.json())
     .then(data => {
@@ -185,6 +187,7 @@ function Favorites(event){
             SubmovieDiv.style.height = "100%";
             
             movieDiv.addEventListener('click', function() {
+                movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
                 window.location.href = `VideoPlayer.php?id=${movie.id}`;
             });
 
