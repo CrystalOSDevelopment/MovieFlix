@@ -234,33 +234,40 @@ else{
 }
 
 // Age limit from OMDB. Can be placed in index.php
-$apikey = ""; // Your OMDB API key here
+$apikey = "a te csodalatos kulcsod"; // Your OMDB API key here
 $FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . "&apikey=" . $apikey);
 $OMDBData = json_decode($FetchedOMDBData, true);
 $Film_Korhatar = $OMDBData['Rated'];
-
+$Film_besorolas_szoveg = '';
 
 switch ($Film_Korhatar) {
     case 'G':
         $Film_Korhatar_Magyar = '0';
+        $Film_besorolas_szoveg = 'Minden korosztály számára megtekinthető';
         break;
     case 'PG':
         $Film_Korhatar_Magyar = '6';
+        $Film_besorolas_szoveg = 'A műsorszám megtekíntése 6 éven aluliak számára nem ajánlott';
         break;
     case 'PG-13':
         $Film_Korhatar_Magyar = '12';
+        $Film_besorolas_szoveg = 'A műsorszám megtekíntése 12 éven aluliak számára nem ajánlott';
         break;
     case 'R':
         $Film_Korhatar_Magyar = '16';
+        $Film_besorolas_szoveg = 'A műsorszám megtekíntése 16 éven aluliak számára nem ajánlott';
         break;
     case 'NC-17':
         $Film_Korhatar_Magyar = '18';
+        $Film_besorolas_szoveg = 'A műsorszám megtekíntése 18 éven aluliak számára nem ajánlott';
         break;
     case 'X':
         $Film_Korhatar_Magyar = 'X';
+        $Film_besorolas_szoveg = "Csak felnőtteknek! Durva tartalom!";
         break;
     default:
         $Film_Korhatar_Magyar = '1';
+        $Film_besorolas_szoveg = 'Korhatárra való tekintet nélkül megtekinthető';
         break;
 }
 
@@ -692,7 +699,7 @@ echo "<!DOCTYPE html>
                     <div style=\"display: flex; justify-content: flex-start; align-items: center;\">
                         <img src=\"{$Film_Korhatar_Magyar}.png\"
                             alt=\"Korhatár\" class=\"korhatar\">
-                        <div class=\"film-description\">A műsorszám megtekintése {$Film_Korhatar_Magyar} éven aluliak számára nem ajánlott.</div>
+                        <div class=\"film-description\">{$Film_besorolas_szoveg}</div>
                         
                     </div>
                     <div class=\"buttons\">
