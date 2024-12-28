@@ -9,7 +9,9 @@ function Search(event) {
 
     const movieDataDiv = document.getElementById('movieData');
     movieDataDiv.style.display = 'block';
-    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+    //movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+
+    document.getElementById('loader').style.display = 'block'; // Shows the loader
 
     fetch(`index.php`, {
         method: 'POST',
@@ -26,6 +28,8 @@ function Search(event) {
         fetch(`movies.php?year=${searchTerm.trim() != "" ? "" : year}&search=${searchTerm.trim()}&orderBy=` + selectedOption)
         .then(response => response.json())
         .then(data => {
+            document.getElementById('loader').style.display = 'none'; // Shows the loader
+
             movieDataDiv.innerHTML = '<h2>Keresési találatok erre: <i style=\"color: gray\">"' + searchTerm.trim() + '"</i></h2>';
 
             // Create a div
@@ -62,10 +66,23 @@ function Search(event) {
                 SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
                 SubmovieDiv.style.height = "100%";
                 
-                movieDiv.addEventListener('click', function() {
-                    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+                movieDiv.addEventListener('click', function () {
+                    const loader = document.getElementById('loader');
+                
+                    if (loader) {
+                        loader.style.display = 'block'; // Display the loader
+                    }
+                
+                    // Start a timer to hide the loader in the background (after 15 seconds)
+                    setTimeout(() => {
+                        if (loader) {
+                            loader.style.display = 'none'; // Hide the loader
+                        }
+                    }, 15000); // 15000ms = 15 seconds
+                
+                    // Navigate to the new page (this happens immediately, so the timer runs in the background)
                     window.location.href = `VideoPlayer.php?id=${movie.id}`;
-                });
+                });                
     
                 SubmovieDiv.style.paddingTop = '40px';
                 movieDiv.appendChild(SubmovieDiv);
@@ -89,10 +106,15 @@ function Recents(event){
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
     movieDataDiv.style.display = 'block';
-    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+    //movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+
+    document.getElementById('loader').style.display = 'block'; // Shows the loader
+
     fetch(`movies.php?wantRecents=1`)
     .then(response => response.json())
     .then(data => {
+        document.getElementById('loader').style.display = 'none'; // Shows the loader
+        
         movieDataDiv.innerHTML = '<h2>Legutóbbi filmek</h2>';
         const UpperDiv = document.createElement('div');
         if(window.innerWidth > 425) {
@@ -125,10 +147,23 @@ function Recents(event){
             SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
             SubmovieDiv.style.height = "100%";
             
-            movieDiv.addEventListener('click', function() {
-                movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+            movieDiv.addEventListener('click', function () {
+                const loader = document.getElementById('loader');
+            
+                if (loader) {
+                    loader.style.display = 'block'; // Display the loader
+                }
+            
+                // Start a timer to hide the loader in the background (after 15 seconds)
+                setTimeout(() => {
+                    if (loader) {
+                        loader.style.display = 'none'; // Hide the loader
+                    }
+                }, 15000); // 15000ms = 15 seconds
+            
+                // Navigate to the new page (this happens immediately, so the timer runs in the background)
                 window.location.href = `VideoPlayer.php?id=${movie.id}`;
-            });
+            });    
 
             SubmovieDiv.style.paddingTop = '40px';
             movieDiv.appendChild(SubmovieDiv);
@@ -150,10 +185,15 @@ function Favorites(event){
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
     movieDataDiv.style.display = 'block';
-    movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+    //movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+
+    document.getElementById('loader').style.display = 'block'; // Shows the loader
+
     fetch(`movies.php?wantFavorites=1`)
     .then(response => response.json())
     .then(data => {
+        document.getElementById('loader').style.display = 'none'; // Shows the loader
+
         movieDataDiv.innerHTML = '<h2>Kedvencek</h2>';
         const UpperDiv = document.createElement('div');
         if(window.innerWidth > 425) {
@@ -186,8 +226,21 @@ function Favorites(event){
             SubmovieDiv.style.backdropFilter = "blur(4px) brightness(0.3)";
             SubmovieDiv.style.height = "100%";
             
-            movieDiv.addEventListener('click', function() {
-                movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
+            movieDiv.addEventListener('click', function () {
+                const loader = document.getElementById('loader');
+            
+                if (loader) {
+                    loader.style.display = 'block'; // Display the loader
+                }
+            
+                // Start a timer to hide the loader in the background (after 15 seconds)
+                setTimeout(() => {
+                    if (loader) {
+                        loader.style.display = 'none'; // Hide the loader
+                    }
+                }, 15000); // 15000ms = 15 seconds
+            
+                // Navigate to the new page (this happens immediately, so the timer runs in the background)
                 window.location.href = `VideoPlayer.php?id=${movie.id}`;
             });
 
