@@ -234,7 +234,7 @@ else{
 }
 
 // Age limit from OMDB. Can be placed in index.php
-$apikey = "a te csodalatos kulcsod"; // Your OMDB API key here
+$apikey = ""; // Your OMDB API key here
 $FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . "&apikey=" . $apikey);
 $OMDBData = json_decode($FetchedOMDBData, true);
 $Film_Korhatar = $OMDBData['Rated'];
@@ -663,7 +663,7 @@ echo "<!DOCTYPE html>
                     echo "<div id=\"no-trailer-message\" style=\"display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.8); color: white; padding: 20px; font-size: 35px; border-radius: 10px; text-align: center;\">Nincs elérhető előzetes</div>";
                 }
                 else{
-                    echo "<video autoplay muted loop playsinline src=\"{$IMDB_Elozetes}\" style=\"max-width: 100%;\"></video>";
+                    echo "<video autoplay muted loop src=\"{$IMDB_Elozetes}\" style=\"max-width: 100%;\"></video>";
                 }
                 echo "
             </div>
