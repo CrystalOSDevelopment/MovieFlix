@@ -29,6 +29,15 @@ try {
     $stmt = $pdo->prepare("SELECT * FROM links WHERE movie_title LIKE :search_word");
     $stmt->execute(['search_word' => '%' . $SearchWord . '%']);
     $existingMovies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Check if there is an exact match
+    $FoundExactMatch = false;
+    foreach ($existingMovies as $movie) {
+        if (strtolower($movie['movie_title']) == strtolower($SearchWord)) {
+            $FoundExactMatch = true;
+            break;
+        }
+    }
     
     if (!empty($existingMovies)) {
         // Display existing movies
@@ -39,7 +48,7 @@ try {
             echo "Release date: " . htmlspecialchars($movie['release_date']) . "<br>";
             echo "<br>";
         }
-    } else {
+    } if(empty($existingMovies) || $FoundExactMatch == false) {
         // Look up the movie on the website
         $baseUrl = 'https://filmezz.club/kereses.php?';
         //'&e=' . $ev
