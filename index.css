@@ -51,7 +51,27 @@ input[type="submit"]:hover {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(243px, 0fr));
     gap: 40px;
-    width: 100%;
+    width: fit-content;
+    margin-left: 35px;
+}
+
+@media (min-width: 1024px){
+    #movieData > div, #movieData{
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(243px, 0fr));
+        gap: 40px;
+        width: 90%;
+        margin-left: 35px;
+    }
+}
+
+@media (max-width: 840px){
+    #movieData > div, #movieData {
+        margin-left: 0px;
+    }
+    #movieData{
+        margin-left: 40px;
+    }
 }
 
 #movieData > h2{
@@ -123,10 +143,17 @@ input[type="submit"]:hover {
     }
 
     .movie {
-        max-width: 300px;
-        min-width: 300px;
-        margin: 0 auto;
+        margin: 0 auto 20px;
     }
+}
+
+@media screen and (max-width: 425px) {
+    #movieData > div, #movieData{
+        display: block;
+        margin-left: 0;
+        width: auto;
+    }
+    
 }
 
 .NavBar{

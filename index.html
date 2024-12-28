@@ -164,6 +164,14 @@
             transition: transform 0.3s;
         }
 
+        @media (min-width: 840px) {
+            #movieData {
+                margin-left: 80px;
+            }
+        }
+
+
+        /* Mobile compatibility */
         @media (max-width: 768px) {
             .categories-header {
                 display: flex; /* Mobil nézetben jelenjen meg */
@@ -189,13 +197,14 @@
                 align-items: center;
                 padding: 25px 20px; 
             }
+            #MainPage{
+                display: none;
+            }
            
             .SearchOptions {
-                display: flex
-            ;
+                display: flex;
                 flex-direction: column;
                 margin-right: 30px;
-                /* width: 1000px; */
             }
 
             .MainBody {
@@ -215,11 +224,22 @@
             }
             
             .Search {
-                max-width: 402px;
+                width: 95%;
                 min-height: fit-content;
             }
             .Categories {
-                padding: 10px;
+                /*padding: 10px;*/
+                width: 95%;
+                max-width: none;
+                padding-left: 0px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+
+            .categories-header{
+                width: 85%;
+                margin-left: auto;
+                margin-right: auto;
             }
             .categories-grid {
                 justify-content: center;
@@ -228,12 +248,40 @@
                 flex: 1 1 100%;
                 text-align: center;
             }
-            .movieData {
+            #movieData {
                 flex-direction: column;
+                margin-left: auto;
             }
-            .movieData > .movie {
+            #movieData > .movie {
                 width: 100%;
                 margin-bottom: 20px;
+            }
+            #movieData > h2{
+                margin-left: 0px;
+            }
+
+            #movieData > div, #movieData{
+                width: 95%;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #movieData > div {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(45%, 0fr));
+                gap: 40px;
+                width: 95%;
+                margin-left: 0px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            #movieData > div {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(243px, 0fr));
+                gap: 40px;
+                width: 95%;
+                margin-left: 0px;
             }
         }
 
@@ -243,7 +291,7 @@
     <div class="header">
         <img src="logo.svg" alt="MovieFlix Logo" class="logo">
         <div class="menu">
-            <div class="menu-item">
+            <div class="menu-item" id="MainPage">
                 <a href="index.html" style="text-decoration: none; color: inherit;">Főoldal</a>
             </div>
             <div class="menu-item" id="Recents">Legutóbbiak</div>
@@ -284,7 +332,7 @@
             </div>
             
         </div>
-        <div id="movieData" style="margin-left: 80px; margin-top: 40px;display: flex; flex-wrap: wrap;flex-direction: row;"></div>
+        <div id="movieData" style="margin-top: 40px;display: flex; flex-wrap: wrap;flex-direction: row; max-width: 90%;"></div>
     </div>
 
     <script>

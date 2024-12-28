@@ -30,7 +30,12 @@ function Search(event) {
 
             // Create a div
             const UpperDiv = document.createElement('div');
-            UpperDiv.style.display = 'grid';
+            // Only if the resolut is above 425px
+            if(window.innerWidth > 425) {
+                UpperDiv.style.display = 'grid';
+            }
+            UpperDiv.style.maxWidth = '90%';
+            // UpperDiv.style.display = 'grid';
             data.forEach(movie => {
                 const movieDiv = document.createElement('div');
                 movieDiv.classList.add('movie');
@@ -89,6 +94,10 @@ function Recents(event){
     .then(data => {
         movieDataDiv.innerHTML = '<h2>Legutóbbi filmek</h2>';
         const UpperDiv = document.createElement('div');
+        if(window.innerWidth > 425) {
+            UpperDiv.style.display = 'grid';
+        }
+        UpperDiv.style.maxWidth = '90%';
         data.forEach(movie => {
             const movieDiv = document.createElement('div');
             movieDiv.classList.add('movie');
@@ -145,6 +154,10 @@ function Favorites(event){
     .then(data => {
         movieDataDiv.innerHTML = '<h2>Kedvencek</h2>';
         const UpperDiv = document.createElement('div');
+        if(window.innerWidth > 425) {
+            UpperDiv.style.display = 'grid';
+        }
+        UpperDiv.style.maxWidth = '90%';
         data.forEach(movie => {
             const movieDiv = document.createElement('div');
             movieDiv.classList.add('movie');
