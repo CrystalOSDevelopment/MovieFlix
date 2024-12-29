@@ -8,10 +8,10 @@ function Search(event) {
     const type = "";
 
     const movieDataDiv = document.getElementById('movieData');
-    movieDataDiv.style.display = 'block';
+    movieDataDiv.style.display = 'flex';
     //movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
 
-    document.getElementById('loader').style.display = 'block'; // Shows the loader
+    document.getElementById('loader').style.display = 'flex'; // Shows the loader
 
     fetch(`index.php`, {
         method: 'POST',
@@ -70,7 +70,7 @@ function Search(event) {
                     const loader = document.getElementById('loader');
                 
                     if (loader) {
-                        loader.style.display = 'block'; // Display the loader
+                        loader.style.display = 'flex'; // Display the loader
                     }
                 
                     // Start a timer to hide the loader in the background (after 15 seconds)
@@ -105,10 +105,10 @@ function Search(event) {
 function Recents(event){
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
-    movieDataDiv.style.display = 'block';
+    movieDataDiv.style.display = 'flex';
     //movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
 
-    document.getElementById('loader').style.display = 'block'; // Shows the loader
+    document.getElementById('loader').style.display = 'flex'; // Shows the loader
 
     fetch(`movies.php?wantRecents=1`)
     .then(response => response.json())
@@ -151,7 +151,7 @@ function Recents(event){
                 const loader = document.getElementById('loader');
             
                 if (loader) {
-                    loader.style.display = 'block'; // Display the loader
+                    loader.style.display = 'flex'; // Display the loader
                 }
             
                 // Start a timer to hide the loader in the background (after 15 seconds)
@@ -184,10 +184,10 @@ function Recents(event){
 function Favorites(event){
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
-    movieDataDiv.style.display = 'block';
+    movieDataDiv.style.display = 'flex';
     //movieDataDiv.innerHTML = '<div id="loader"><div class="spinner"></div></div>';
 
-    document.getElementById('loader').style.display = 'block'; // Shows the loader
+    document.getElementById('loader').style.display = 'flex'; // Shows the loader
 
     fetch(`movies.php?wantFavorites=1`)
     .then(response => response.json())
@@ -230,7 +230,7 @@ function Favorites(event){
                 const loader = document.getElementById('loader');
             
                 if (loader) {
-                    loader.style.display = 'block'; // Display the loader
+                    loader.style.display = 'flex'; // Display the loader
                 }
             
                 // Start a timer to hide the loader in the background (after 15 seconds)
