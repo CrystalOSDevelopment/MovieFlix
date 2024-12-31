@@ -234,7 +234,7 @@ else{
 }
 
 // Age limit from OMDB. Can be placed in index.php
-$apikey = "37daa229"; // Your OMDB API key here
+$apikey = ""; // Your OMDB API key here
 $FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . "&apikey=" . $apikey);
 $OMDBData = json_decode($FetchedOMDBData, true);
 $Film_Korhatar = $OMDBData['Rated'];
@@ -270,6 +270,9 @@ switch ($Film_Korhatar) {
         $Film_besorolas_szoveg = 'Korhatárra való tekintet nélkül megtekinthető';
         break;
 }
+
+// Remove every date from the movie title
+$Film_Cim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
 
 // The html code for the entire page
 echo "<!DOCTYPE html>
@@ -640,6 +643,102 @@ echo "<!DOCTYPE html>
                 }
             }
 
+            /* Mobile resolution 320px wide*/
+            @media (max-width: 425px){
+                .video-player {
+                    height: 50vh;
+                }
+                .bottom-bar {
+                    height: 50vh;
+                }
+                .poster-frame {
+                    width: 150px;
+                    height: 225px;
+                }
+                .film-title {
+                    font-size: 24px;
+                }
+                .film-details {
+                    font-size: 14px;
+                }
+                .film-description {
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                .buttons {
+                    gap: 10px;
+                }
+                .button {
+                    padding: 5px 10px;
+                    font-size: 14px;
+                }
+                .korhatar {
+                    width: 20px;
+                    height: 20px;
+                    margin-bottom: 0px;
+                    padding: 5px;
+                }
+                .adatlap {
+                    font-size: 13px;
+                }
+                .footer {
+                    font-size: 12px;
+                }
+                
+                .logo{
+                    //display: none;
+                    width: 30px;
+                    margin-right: 15px;
+                }
+                .poster-frame{
+                    display: none;
+                }
+                .video-player video{
+                    height: 33%;
+                }
+                .bottom-bar{
+                    top: 23%;
+                    height: auto;
+                }
+                .buttons{
+                    display: flex;
+                    flex-direction: column;
+                    margin-left: auto;
+                    margin-right: auto;
+                    width: 100%;
+                }
+                .ltr-bjn8wh{
+                    display: none;
+                }
+                .videoMetadata--second-line{
+                    padding-bottom: 20px;
+                    font-size: 16px;
+                }
+                .film-description{
+                    margin-bottom: 0px;
+                }
+                .Age_Restr{
+                    margin-bottom: 20px;
+                }
+                .bottom-bar .content{
+                    width: auto;
+                    margin-left: 0px;
+                    height: auto;
+                }
+                .menu{
+                    margin-left: auto;
+                    margin-right: auto;
+                    gap: 15px;
+                }
+                .header{
+                    padding: 0 15px;
+                    height: 55px;
+                }
+                .bottom-bar .content {
+                    justify-content: start;
+                }
+            }
+
         </style>
     </head>
     <body>
@@ -695,8 +794,8 @@ echo "<!DOCTYPE html>
                     <div class=\"menu-item\">
                         <a href=\"index.html?Page=Favorites\" style=\"text-decoration: none; color: inherit;\">Kedvencek</a>
                     </div>
-                    <div class=\"menu-item\">Profilom</div>
-                    <div class=\"menu-item\">Beállítások</div>
+                    <!-- <div class=\"menu-item\">Profilom</div>
+                    <div class=\"menu-item\">Beállítások</div> -->
                 </div>
             </div>
             <div class=\"video-player\">";
@@ -737,7 +836,7 @@ echo "<!DOCTYPE html>
                             </div>
                         </div>  
                     
-                    <div style=\"display: flex; justify-content: flex-start; align-items: center;\">
+                    <div class=\"Age_Restr\" style=\"display: flex; justify-content: flex-start; align-items: center;\">
                         <img src=\"{$Film_Korhatar_Magyar}.png\"
                             alt=\"Korhatár\" class=\"korhatar\">
                         <div class=\"film-description\">{$Film_besorolas_szoveg}</div>
@@ -789,33 +888,41 @@ echo "<!DOCTYPE html>
         </body>    
         <script src=\"https://vjs.zencdn.net/7.11.4/video.min.js\"></script>
         <script>
-            const bottomBar = document.querySelector(\".bottom-bar\");
+            // If the viewport is more than 320px wide, don't do this animation
+            if (window.innerWidth > 512) {
+                const bottomBar = document.querySelector(\".bottom-bar\");
 
-            // Alapértelmezett helyzet: kicsit fentebb
-            bottomBar.style.position = \"fixed\";
-            bottomBar.style.bottom = \"-330px\"; // Alapértelmezett távolság az aljától
-            bottomBar.style.transition = \"bottom 0.3s ease-in-out\"; // Simább mozgás
-
-            // Amikor az egér rámegy a bottom-bar-ra, teljesen az aljára csúszik
-            bottomBar.addEventListener(\"mouseenter\", function () {
-                bottomBar.style.bottom = \"0px\"; // Teljesen az oldal aljára kerül
-                bottomBar.classList.add(\"scrolled\");
-            });
-
-            // Amikor az egér elhagyja a bottom-bar-t, visszaáll az alap helyzetbe
-            bottomBar.addEventListener(\"mouseleave\", function () {
+                // Alapértelmezett helyzet: kicsit fentebb
+                bottomBar.style.position = \"fixed\";
                 bottomBar.style.bottom = \"-330px\"; // Alapértelmezett távolság az aljától
-                bottomBar.classList.remove(\"scrolled\");
-            });
+                bottomBar.style.transition = \"bottom 0.3s ease-in-out\"; // Simább mozgás
 
-            // Ellenőrizze az előzetes állapotát
-            var video = document.getElementById(\"trailer\");
-            var noTrailerMessage = document.getElementById(\"no-trailer-message\");
+                // Amikor az egér rámegy a bottom-bar-ra, teljesen az aljára csúszik
+                bottomBar.addEventListener(\"mouseenter\", function () {
+                    bottomBar.style.bottom = \"0px\"; // Teljesen az oldal aljára kerül
+                    bottomBar.classList.add(\"scrolled\");
+                });
 
-            if (video.readyState !== 4) {
-                // Ha az előzetes nem található
-                noTrailerMessage.style.display = \"block\";
-                video.style.display = \"none\";
+                // Amikor az egér elhagyja a bottom-bar-t, visszaáll az alap helyzetbe
+                bottomBar.addEventListener(\"mouseleave\", function () {
+                    bottomBar.style.bottom = \"-330px\"; // Alapértelmezett távolság az aljától
+                    bottomBar.classList.remove(\"scrolled\");
+                });
+
+                // Ellenőrizze az előzetes állapotát
+                var video = document.getElementById(\"trailer\");
+                var noTrailerMessage = document.getElementById(\"no-trailer-message\");
+
+                if (video.readyState !== 4) {
+                    // Ha az előzetes nem található
+                    noTrailerMessage.style.display = \"block\";
+                    video.style.display = \"none\";
+                }
+            }
+            else{
+                const bottomBar = document.querySelector(\".bottom-bar\");
+                bottomBar.style.bottom = \"0px\";
+                console.log('Mobile resolution');
             }
         </script>
 
