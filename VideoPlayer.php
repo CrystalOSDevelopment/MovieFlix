@@ -22,6 +22,7 @@ $Film_Link = "";
 $Film_leiras = "";
 $Film_Kedvenc = false;
 $Film_Korhatar = "";
+$IMDBCode = "";
 
 if ($MovieID) {
     try {
@@ -120,10 +121,13 @@ if ($MovieID) {
                 $script = 'fetchPage.js';
 
                 $output = [];
-                $returnVar = 0;
+                $returnVar = -1;
 
                 // Execute the Puppeteer script to extract video tags
-                exec("node $script " . escapeshellarg($IMDBVideoURL), $output, $returnVar);
+                while($returnVar !== 0 || count($output) === 0){
+                    exec("node $script " . escapeshellarg($IMDBVideoURL), $output, $returnVar);
+                }
+                // exec("node $script " . escapeshellarg($IMDBVideoURL), $output, $returnVar);
 
                 if ($returnVar === 0) {
                     $IMDB_Elozetes = $output[0];
@@ -157,7 +161,7 @@ if ($MovieID) {
         }
 
         // If no movies found, pull it from mozimix.com
-        if ($Film_Link == "" && $NeedsUpdate) {
+        if ($Film_Link == "" || $NeedsUpdate) {
             // Remove every date from the movie title
             $Film_Cim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
             // Remove dots from the end of the movie title
@@ -196,8 +200,12 @@ if ($MovieID) {
 
             // Export the video from the new source from the video tag
             if ($ExportLink !== "") {
-                $ExportLink = exec("node index.js " . escapeshellarg($BestLink));
-                $Film_Link = $ExportLink;
+                while($Film_Link === ""){
+                    $ExportLink = exec("node index.js " . escapeshellarg($ExportLink));
+                    $Film_Link = $ExportLink;
+                }
+                // $ExportLink = exec("node index.js " . escapeshellarg($BestLink));
+                // $Film_Link = $ExportLink;
             }
 
             // Update the trailer link in the database with the new link
@@ -458,7 +466,6 @@ echo "<!DOCTYPE html>
             }
             .film-description {
                 font-size: 20px;
-                margin-bottom: 30px;
             }
             .buttons {
                 display: flex;
@@ -505,7 +512,6 @@ echo "<!DOCTYPE html>
             .korhatar {
                 width: 30px;
                 height: 30px;
-                margin-bottom: 30px;
                 padding: 10px;
             }
             .adatlap {
@@ -605,6 +611,10 @@ echo "<!DOCTYPE html>
                 opacity: 1;
             }
 
+            .Age_Restr {
+                margin-bottom: 10px;
+            }
+
             /* Loader teljes képernyőn */
             #loader {
                 position: fixed;
@@ -643,8 +653,8 @@ echo "<!DOCTYPE html>
                 }
             }
 
-            /* Mobile resolution 320px wide*/
-            @media (max-width: 425px){
+            /* Mobile resolution 425px wide, but still waiting for confirmation! */
+            @media (max-width: 715px){
                 .video-player {
                     height: 50vh;
                 }
@@ -739,6 +749,16 @@ echo "<!DOCTYPE html>
                 }
             }
 
+            /* Tablet view 820px wide */
+            @media (max-width: 820px){
+                .buttons{
+                    display: block;
+                }
+                .button{
+                    margin-bottom: 10px;
+                    width: 100%;
+                }
+            }
         </style>
     </head>
     <body>
@@ -844,7 +864,7 @@ echo "<!DOCTYPE html>
                     </div>
                     <div class=\"buttons\">
                         <button class=\"button button-watch\" id=\"openModalBtn\">Megtekintem</button>
-                        <button class=\"button button\" onclick=\"window.location.href=\'' . $IMDB_Elozetes . '\'\">Előzetes megtekintése</button>
+                        <button class=\"button button\" onclick=\"window.location.href='upcNEW.php?MovieID={$IMDBCode}'\">Előzetes megtekintése</button>
                         <button class=\"button button-add\" id=\"AddtoFavorites\">"; echo $Film_Kedvenc? "Hozzáadva kedvencekhez" : "Kedvencekhez adás"; echo "</button>
                     </div>
                     <script>

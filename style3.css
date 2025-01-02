@@ -6,7 +6,7 @@
     justify-content: center;
     width: 99%;
     position: absolute;
-    bottom: 2%;
+    bottom: 4%;
 }
 .frame:hover {
     opacity: 0.8;
