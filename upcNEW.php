@@ -105,7 +105,7 @@
     </style>
   </head>
   <body>
-    <video id="myVideo" autoplay muted style="position: fixed; object-fit:contain;" width="100%" height="100%"> 
+    <video id="myVideo" autoplay style="position: fixed; object-fit:contain;" width="100%" height="100%"> 
       <source src="<?php echo htmlspecialchars($URL); ?>" type="video/mp4">
       Your browser does not support the video tag.
     </video>

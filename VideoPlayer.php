@@ -202,7 +202,9 @@ if ($MovieID) {
             if ($ExportLink !== "") {
                 while($Film_Link === ""){
                     $ExportLink = exec("node index.js " . escapeshellarg($ExportLink));
-                    $Film_Link = $ExportLink;
+                    if(str_contains($ExportLink, 'Error') !== true){
+                        $Film_Link = $ExportLink;
+                    }
                 }
                 // $ExportLink = exec("node index.js " . escapeshellarg($BestLink));
                 // $Film_Link = $ExportLink;
@@ -791,7 +793,20 @@ echo "<!DOCTYPE html>
                             echo "<video-js style=\"width: 100%; height: 100%;\" id=\"my-video\" class=\"video-js vjs-default-skin embed-responsive-item\" controls preload=\"auto\" width=\"80%\" height=\"80%\" data-setup='{}'>
                             <source src=\"{$Film_Link}\" type=\"application/x-mpegURL\">
                             </video-js>";
-                        } else {
+                        }
+                        else if(strpos($Film_Link, 'mkv') !== false){
+                            // Try playing it in the browser
+                        echo '<video id="my-video" class="video-js" controls preload="auto" width="640" height="360"
+                                    data-setup=\'{}\'>
+                                    <source src="' . $Film_Link. '" type="video/webm"> <!-- Replace with the file path -->
+                                    <p class="vjs-no-js">
+                                        To view this video please enable JavaScript, and consider upgrading to a
+                                        web browser that
+                                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                                    </p>
+                                </video>';
+                        }
+                        else {
                             echo "<iframe src=\"{$Film_Link}\" class=\"embed-responsive-item\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>";
                         }
                         echo "
