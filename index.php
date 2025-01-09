@@ -1,272 +1,424 @@
-<?php
-require 'vendor/autoload.php';
-
-use Nesk\Puphpeteer\Puppeteer;
-use GuzzleHttp\Client;
-
-$httpClient = new Client([
-    'headers' => [
-        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-    ],
-]);
-
-$ev = isset($_POST['year']) ? $_POST['year'] : 0;
-$page = isset($_POST['page']) ? $_POST['page'] : 0;
-$SearchWord = isset($_POST['search']) ? $_POST['search'] : '';
-
-echo "Év: " . $ev . "<br>";
-echo "Oldal: " . $page . "<br>";
-echo "Keresés: " . $SearchWord . "<br>";
-if(trim($SearchWord) != ""){
-    $ev = 0;
-}
-
-try {
-    $pdo = new PDO('mysql:host=localhost;dbname=links_db', 'root', '');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Check if the movie already exists in the database
-    $stmt = $pdo->prepare("SELECT * FROM links WHERE movie_title LIKE :search_word");
-    $stmt->execute(['search_word' => '%' . $SearchWord . '%']);
-    $existingMovies = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Check if there is an exact match
-    $FoundExactMatch = false;
-    foreach ($existingMovies as $movie) {
-        if (strtolower($movie['movie_title']) == strtolower($SearchWord)) {
-            $FoundExactMatch = true;
-            break;
-        }
+<?PHP
+    session_start();
+    if(!isset($_SESSION['UName'])){
+        header('Location: Login/Login.html');
     }
-    
-    if (!empty($existingMovies)) {
-        // Display existing movies
-        foreach ($existingMovies as $movie) {
-            echo "Movie title: " . htmlspecialchars($movie['movie_title']) . "<br>";
-            echo "Movie length: " . htmlspecialchars($movie['movie_length']) . " minutes<br>";
-            echo "Link: <a href='" . htmlspecialchars($movie['link']) . "'>" . htmlspecialchars($movie['link']) . "</a><br>";
-            echo "Release date: " . htmlspecialchars($movie['release_date']) . "<br>";
-            echo "<br>";
-        }
-    } if(empty($existingMovies) || $FoundExactMatch == false) {
-        // Look up the movie on the website
-        $baseUrl = 'https://filmezz.club/kereses.php?';
-        //'&e=' . $ev
-        $response = $httpClient->get($baseUrl . 'p=' . $page . '&q=0&l=0&c=0&t=1&h=&o=abc&s=' . $SearchWord);
-        $htmlString = (string) $response->getBody();
-        libxml_use_internal_errors(true);
-        $doc = new DOMDocument();
-        $doc->loadHTML($htmlString);
-        $xpath = new DOMXPath($doc);
-
-        // Simplify the XPath expression for debugging
-        $titles = $xpath->evaluate('//ul[@class="row list-unstyled movie-list"]//li/a');
-        $covers = $xpath->evaluate('//ul[@class="row list-unstyled movie-list"]//li/a/img');
-
-        // Debug: Print the number of elements found
-        echo "Number of titles found: " . $titles->length . "<br>";
-        echo "Number of covers found: " . $covers->length . "<br>";
-
-        // Cycles thru the movies
-        foreach ($titles as $index => $title) {
-            echo "<br>";
-            $movieTitle = $title->textContent;
-            $filmLink = $title->getAttribute('href');
-            $teljesFilmLink = 'https://filmezz.club' . $filmLink;
-
-            // Pulls the cover image by source
-            $cover = $covers->item($index);
-            $coverUrl = $cover ? $cover->getAttribute('src') : '';
-            echo 'Cover: <img src="' . htmlspecialchars($coverUrl) . '" style="max-width: 200px;"><br>';
-            echo 'Adatlap: <a href="' . htmlspecialchars($teljesFilmLink) . '">' . htmlspecialchars($teljesFilmLink) . '</a><br>';
-            
-            // Path to data of the movie
-            $movieTitle = $xpath->evaluate('.//span[@class="title"]', $title)->item(0)->textContent ?? 'N/A';
-
-            // Check if the movie already exists in the database
-            if($ev == 0){
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM links WHERE movie_title LIKE :movie_title");
-                $stmt->execute([
-                    'movie_title' => '%' . $movieTitle . '%',
-                ]);
-            }
-            else{
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM links WHERE movie_title LIKE :movie_title AND release_date = :release_date");
-                $stmt->execute([
-                    'movie_title' => '%' . $movieTitle . '%',
-                    'release_date' => $ev,
-                ]);
-            }
-            $count = $stmt->fetchColumn();
-            
-            // $stmt = $pdo->prepare("SELECT COUNT(*) FROM links WHERE movie_title LIKE :movie_title AND release_date = :release_date");
-            // $stmt->execute([
-            //     'movie_title' => '%' . $movieTitle . '%',
-            //     'release_date' => $ev,
-            // ]);
-            // $count = $stmt->fetchColumn();
-            
-            // Beküldött link handling (video links)
-            
-            // If the movie exists in the database, skip it
-            if($count == 0){
-                
-                $moviePageResponse = $httpClient->get($teljesFilmLink);
-                $moviePageHtml = (string) $moviePageResponse->getBody();
-                $moviePageDoc = new DOMDocument();
-                $moviePageDoc->loadHTML($moviePageHtml);
-                $moviePageXpath = new DOMXPath($moviePageDoc);
-                
-                // This gets called in the foreach loop
-                $bekuldottLinkek = $moviePageXpath->evaluate('//div[@class="container movie-page"]//div[@class="row"]//div[@class="col-md-9 col-sm-12"]//section[@class="content-box"]//div[@class="row"]//div[@class="col-md-6 col-sm-12"]/a/@href');
-                
-                // Extract data from the movie page, but only if it doesn't exist in the database
-                $imdbInfo = $xpath->evaluate('.//span[contains(text(), "IMDB:")]', $title)->item(0)->textContent ?? 'N/A';
-                $director = $xpath->evaluate('.//li[span[text()="Rendező:"]]', $title)->item(0)->textContent ?? 'N/A';
-                $length = $xpath->evaluate('.//li[span[text()="Hossz:"]]', $title)->item(0)->textContent ?? 'N/A';
-                $category = $xpath->evaluate('.//li[span[text()="Kategória:"]]', $title)->item(0)->textContent ?? 'N/A';// Needs to be fixed
-                $rating = $xpath->evaluate('.//span[contains(@class, "imdb")]', $title)->item(0)->textContent ?? 'N/A';
-                $description = "";
-                $category = htmlspecialchars(trim(str_replace("Kategória:", "", $category)));
-
-                $textDivs = $moviePageXpath->evaluate('//div[contains(@class, "text")]');
-                foreach ($textDivs as $textDiv) {
-                    $description = htmlspecialchars($textDiv->textContent);
-                    break;
-                }
-
-                $director = htmlspecialchars(trim(str_replace("Rendező:", "", $director)));
-                
-                // Display movie data
-                echo "Cím: " . htmlspecialchars(trim($movieTitle)) . "<br>";
-                echo htmlspecialchars(trim($imdbInfo)) . "<br>";
-                echo htmlspecialchars(trim($director)) . "<br>";
-                $lengthWithoutLabel = trim(str_replace("Hossz:", "", $length));
-                $totalMinutes = convertToMinutes($lengthWithoutLabel);
-                echo "Hossz: " . htmlspecialchars(trim($totalMinutes)) . " perc" . "<br>";
-                echo "Értékelés: " . htmlspecialchars(trim($rating)) . "<br><br>";
-                echo "Kategrória: " . htmlspecialchars(str_replace("Kategória:", "", trim($category))) . "<br>";
-                echo "Rendező: " . htmlspecialchars(trim($director)) . "<br>";
-                echo "Rating: " . htmlspecialchars(trim($rating)) . "<br>";
-                
-                foreach ($bekuldottLinkek as $bekuldottLink) {
-                    // Extract the actors list from the Adatlap page
-                    $Actors = $moviePageXpath->evaluate('//div[@class="container movie-page"]//div[@class="row"]//aside[@class="col-md-3 col-sm-12 sidebar"]//div[@class="sidebar-article details"]//ul[@class="list-unstyled"]//li//a');
-                    // Write out every actor
-                    $actorList = "";
-                    foreach ($Actors as $actor) {
-                        $actorList .= $actor->textContent . ", ";
-                    }
-                    $actorList = rtrim($actorList, ", ");
-                    echo "Szereplők: " . htmlspecialchars($actorList) . "<br>";
-                    $director .= "\n" . $actorList;
-
-                    // It doesn't enter here yet
-                    $detailLink = $bekuldottLink->textContent;
-                    echo 'Beküldött: <a href="' . $bekuldottLink->textContent . '">' . $bekuldottLink->textContent . '</a><br>';
-                    
-                    $detailResponse = $httpClient->get($detailLink);
-                    $detailHtml = (string) $detailResponse->getBody();
-                    $detailDoc = new DOMDocument();
-                    $detailDoc->loadHTML($detailHtml);
-                    $detailXpath = new DOMXPath($detailDoc);
-                    $videoUrls = $detailXpath->evaluate('//div[@class="col-12 mt-4"]//section[@class="content-box"]//ul[@class="list-unstyled table-horizontal url-list"]//li//div[@class="col-sm-1 col-xs-6"]/a/@href');
-                    $secondDivContents = $detailXpath->evaluate('//ul[@class="list-unstyled table-horizontal url-list"]/li/div[2]');
-                    
-                    $videoUrls = $detailXpath->evaluate('//div[@class="col-12 mt-4"]//section[@class="content-box"]//ul[@class="list-unstyled table-horizontal url-list"]//li//div[@class="col-sm-1 col-xs-6"]/a/@href');
-                    $secondDivContents = $detailXpath->evaluate('//ul[@class="list-unstyled table-horizontal url-list"]/li/div[2]');
-                    
-                    $FoundEZLink = false;
-                    $preferredLinks = [];
-                    $backupLinks = [];
-        
-                    // Collect links in a single pass
-                    foreach ($videoUrls as $index => $videoUrl) {
-                        $url = $videoUrl->nodeValue;
-                        $secondDivText = $secondDivContents->item($index + 1)->nodeValue;
-                        $teljesTenylegesLink = 'https://filmtarhely.click';
-                        $fullLink = $teljesTenylegesLink . $url;
-        
-                        // Collect preferred and backup links
-                        if ($secondDivText == "videa.hu" || $secondDivText == "dood.re") {
-                            $preferredLinks[] = $fullLink;
-                        } else//if ($secondDivText == "voe.sx" || $secondDivText == "vtbe.to") {
-                        {
-                            $backupLinks[] = $fullLink;
-                        }
-                    }
-        
-                    $ExportLink = "";
-                    // Execute preferred link if found
-                    if (!empty($preferredLinks)) {
-                        $fullLink = $preferredLinks[0];
-                        echo 'URL: <a href="' . $fullLink . '">' . htmlspecialchars($secondDivText) . '</a><br>';
-                        $ExportLink = $fullLink;
-                        $FoundEZLink = true;
-                    }
-        
-                    // If no preferred link found, execute backup link
-                    if (!$FoundEZLink && !empty($backupLinks)) {
-                        $fullLink = $backupLinks[0];
-                        //echo 'URL: ' . exec("node index.js " . escapeshellarg($fullLink)) . "<br>";
-                        $ExportLink = exec("node index.js " . escapeshellarg($fullLink));
-                        echo 'URL: <a href="' . $ExportLink . '">' . htmlspecialchars($secondDivText) . '</a><br>';
-                        $FoundEZLink = true;
-                    }
-        
-                    if ($count == 0) {
-                        // If the movie doesn't exist in the database, insert it
-                        $imdbCode = null;
-                        if (strpos($imdbInfo, ":") !== false) {
-                            $parts = explode(":", $imdbInfo);
-                            if (isset($parts[1])) {
-                                $imdbCode = trim($parts[1]);
-                            }
-                        }
-
-                        if ($imdbCode !== null) {
-                            $stmt = $pdo->prepare("INSERT INTO links (movie_title, movie_length, link, release_date, cover, imdb_code, description, Category, Rating, DirANDActors) VALUES (:movie_title, :movie_length, :link, :release_date, :cover, :imdb_code, :description, :Category, :Rating, :DirANDActors)");
-                            $stmt->execute([
-                                'movie_title' => $movieTitle,
-                                'movie_length' => $totalMinutes,
-                                'link' => $ExportLink,
-                                'release_date' => substr($movieTitle, strrpos($movieTitle, "(") + 1, 4),
-                                'cover' => $coverUrl,
-                                'imdb_code' => $imdbCode,
-                                'description' => trim($description),
-                                'Category' => $category,
-                                'Rating' => $rating,
-                                'DirANDActors' => $director,
-                            ]);
-                            echo "Added new movie: " . htmlspecialchars($movieTitle) . "<br>";
-                            echo $totalMinutes . " perc<br>";
-                        } else {
-                            echo "Failed to extract IMDb code from: " . htmlspecialchars($imdbInfo) . "<br>";
-                        }
-                    }
-                }
-            }
-        }
-    }
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
-}
-
-// Convert duration to minutes (helper function)
-function convertToMinutes($duration) {
-    $parts = explode(" ", $duration);
-    $minutes = 0;
-
-    foreach ($parts as $key => $part) {
-        if (strpos($part, "óra") !== false) {
-            // Convert hours to minutes
-            $minutes += (int) $parts[$key - 1] * 60;
-        } elseif (strpos($part, "perc") !== false) {
-            // Add minutes
-            $minutes += (int) $parts[$key - 1];
-        }
-    }
-
-    return $minutes;
-}
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Search</title>
+    <link rel="stylesheet" href="Resources/Styles/index.css">
+    <script src="homepage.js"></script>
+    <!-- Read parameters if any is passed -->
+    <style>
+        body{
+            background-image: linear-gradient(-120deg, #101010 55%, #6FBAFF 100%);
+            background-size: cover;
+            min-height: 100vh;
+        }
+        .header {
+            z-index: 999;
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: rgba(16, 16, 16, 0.75);
+            color: white;
+            border-bottom: 1px solid #747474;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        
+        .logo {
+            height: 50px;
+            margin-right: 30px;
+        }
+        .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .menu-item {
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .menu-item:hover {
+            color: #1e90ff;
+        }
+
+        .filmhossz {
+            /* margin-top: 3px; */
+            top: 0px;
+            position: absolute;
+            right: 20px;
+        }
+        .Search{
+            background-color: rgba(217, 217, 217, 0.5);
+            border-radius: 31.5px;
+            margin: 0px;
+            width: 340px;
+            margin-top: 73px;
+            margin-left: 29px;
+        }
+        .Search input[type="text"] {
+            border: none;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            border-radius: 31.5px;
+            outline: none;
+            width: 80%;
+            background-color: transparent;
+        }
+        .Search input[type="submit"] {
+            background-image: url('Resources/Images/search.png');
+            background-size: 20px;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent;
+            border: none;
+            margin-left: 20px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .Categories {
+            padding-top: 6px;
+            margin-left: 29px;
+            background-color: rgba(240, 240, 240, 0.43);
+            max-width: 402px;
+            min-height: fit-content;
+            padding-bottom: 200px;
+            margin-top: 53px;
+            border-radius: 23px;
+            padding-left: 5px;
+            /* padding-right: 5px; */
+        }
+
+        .categories-grid {
+        display: inline-flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 0px;
+        margin: 0px;
+        }   
+
+        .categories-label {
+            padding-left: 10px;
+            font-size:13px;
+        }
+
+        .Option {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid black;
+            border-radius: 21px;
+            margin: 2px; /* Reduced margin */
+            cursor: pointer;
+            margin: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            min-width: min-content;
+            color: black;
+        }
+        form {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            margin: 0px auto; 
+            flex-wrap: nowrap;
+            flex-direction: row;
+            align-items: stretch;
+        }
+
+        .SearchOptions {
+            display: flex;
+            flex-direction: column;
+            margin-right: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        categories-grid {
+            display: flex; /* Alapértelmezetten nyitva asztali nézetben */
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .categories-header {
+            display: none; /* Csak mobil nézetben jelenik meg */
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background-color: rgba(240, 240, 240, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .categories-arrow {
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        @media (min-width: 840px) {
+            #movieData {
+                margin-left: 80px;
+            }
+        }
+
+
+        /* Mobile compatibility */
+        @media (max-width: 768px) {
+            .categories-header {
+                display: flex; /* Mobil nézetben jelenjen meg */
+            }
+            
+            .categories-grid {
+                display: none; /* Mobil nézetben alapértelmezetten rejtve */
+            }
+
+            .categories-grid.open {
+                display: flex; /* Mobilon kinyitva jelenjen meg */
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                background-image: linear-gradient(-120deg, #101010 55%, #6FBAFF 100%);
+                background-size: cover;
+                min-height: 100vh;
+            }
+            .header {
+                flex-direction: column;
+                align-items: center;
+                padding: 25px 20px; 
+            }
+            #MainPage{
+                display: none;
+            }
+           
+            .SearchOptions {
+                display: flex;
+                flex-direction: column;
+                margin-right: 30px;
+            }
+
+            .MainBody {
+                display: block;
+                margin: 0 auto;
+            }
+
+            .Search input[type="submit"] {
+                width: fit-content;
+            }
+           
+            .menu-item:last-child {
+                border-bottom: none; /* Utolsó elem alatt ne legyen vonal */
+            }
+            .logo {
+                display: none;
+            }
+            
+            .Search {
+                width: 95%;
+                min-height: fit-content;
+            }
+            .Categories {
+                /*padding: 10px;*/
+                width: 95%;
+                max-width: none;
+                padding-left: 0px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+
+            .categories-header{
+                width: 85%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .categories-grid {
+                justify-content: center;
+            }
+            .Option {
+                flex: 1 1 100%;
+                text-align: center;
+            }
+            #movieData {
+                flex-direction: column;
+                margin-left: auto;
+            }
+            #movieData > .movie {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            #movieData > h2{
+                margin-left: 0px;
+            }
+
+            #movieData > div, #movieData{
+                width: 95%;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #movieData > div {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(45%, 0fr));
+                gap: 40px;
+                width: 95%;
+                margin-left: 0px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            #movieData > div {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(243px, 0fr));
+                gap: 40px;
+                width: 95%;
+                margin-left: 0px;
+            }
+        }
+
+        #loader{
+            display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <img src="Resources/Images/logo.svg" alt="MovieFlix Logo" class="logo">
+        <div class="menu">
+            <div class="menu-item" id="MainPage">
+                <a href="index.php" style="text-decoration: none; color: inherit;">Főoldal</a>
+            </div>
+            <div class="menu-item" id="Recents">Legutóbbiak</div>
+            <div class="menu-item" id="Favorites">Kedvencek</div>
+            <!-- <div class="menu-item">Profilom</div> -->
+            <div class="menu-item">Beállítások</div>
+        </div>
+    </div>
+    
+    <div class="MainBody">
+        
+        <div class="SearchOptions">
+            <div class="Search">
+                <form id="searchForm">
+                    <input type="submit" value="" id="fetchAllRecords">
+                    <input type="text" id="SearchTerm" name="SearchTerm" placeholder="" value="">
+                </form>
+            </div>
+            <div class="Categories">
+                <div class="categories-header" onclick="toggleCategories()">
+                    <span class="categories-label">Szűrés kategóriák szerint</span>
+                    <span class="categories-arrow">&#9660;</span>
+                </div>
+                <div class="categories-grid" id="categoriesGrid">
+                    <div class="Option">Év (növekvő)</div>
+                    <div class="Option">Év (csökkenő)</div>
+                    <div class="Option">Cím (A-Z)</div>
+                    <div class="Option">Cím (Z-A)</div>
+                    <div class="Option">Rendező</div>
+                    <div class="Option">Színész</div>
+                    <div class="Option">Műfaj</div>
+                    <div class="Option">Értékelés (növekvő)</div>
+                    <div class="Option">Értékelés (csökkenő)</div>
+                    <div class="Option">Hossz (növekvő)</div>
+                    <div class="Option">Hossz (csökkenő)</div>
+                    <div class="Option">Nyelv</div>
+                    <div class="Option">Ország</div>
+                </div>
+            </div>
+            
+        </div>
+        <div id="movieData" style="margin-top: 40px;display: flex; flex-wrap: wrap;flex-direction: row; max-width: 90%;"></div>
+    </div>
+
+    <div id="loader" style="display: flex;"><div class="spinner"></div></div>
+
+    <script>
+        document.onreadystatechange = function () {
+            if (document.readyState !== "complete") {
+                document.querySelector(
+                    "body").style.visibility = "visible";
+                document.querySelector(
+                    "#loader").style.visibility = "visible";
+            } else {
+                document.querySelector(
+                    "#loader").style.display = "none";
+                document.querySelector(
+                    "body").style.visibility = "visible";
+            }
+        };
+
+
+    </script>
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) { // Change submit to click and it'll do real time search (tinkering with the code is needed to it tho)
+            event.preventDefault();
+            Search(event);
+        });
+    
+        document.getElementById('Recents').addEventListener('click', function(event){
+            event.preventDefault();
+            Recents(event);
+        });
+
+        document.getElementById('Favorites').addEventListener('click', function(event){
+            event.preventDefault();
+            Favorites(event);
+        });
+    </script>
+    <script>
+        let Options = document.querySelectorAll('.Option');
+        Options.forEach(option => {
+            option.addEventListener('click', function() {
+                Options.forEach(option => option.style.backgroundColor = 'transparent');
+                option.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+            });
+        });
+    </script>
+    <script>
+        if (window.innerWidth <= 768) {
+            const toggleButton = document.querySelector('.categories-header');
+            const categoriesGrid = document.getElementById('categoriesGrid');
+            const arrow = document.querySelector('.categories-arrow');
+
+            toggleButton.addEventListener('click', () => {
+                categoriesGrid.classList.toggle('open');
+                arrow.style.transform = categoriesGrid.classList.contains('open') 
+                    ? 'rotate(180deg)' 
+                    : 'rotate(0deg)';
+            });
+        }
+
+    </script>
+
+    <!-- This is where potential data reception via url goes -->
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        switch(params.get('Page')) {
+            case 'Recents':
+                Recents(event);
+                break;
+            case 'Favorites':
+                Favorites(event);
+            default:
+                break;
+        }
+    </script>
+</body>
+</html>

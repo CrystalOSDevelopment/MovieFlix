@@ -251,8 +251,8 @@ else{
     $stmt->execute(['id' => $MovieID]);
 }
 
-// Age limit from OMDB. Can be placed in index.php
-$apikey = ""; // Your OMDB API key here
+// Age limit from OMDB. Can be placed in LinkCatcher.php
+$apikey = "37daa229"; // Your OMDB API key here
 $FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . "&apikey=" . $apikey);
 $OMDBData = json_decode($FetchedOMDBData, true);
 $Film_Korhatar = $OMDBData['Rated'];
@@ -826,7 +826,7 @@ echo "<!DOCTYPE html>
         <div class=\"page-content\">
             <div class=\"background\"></div>
             <div class=\"header\">
-                <img src=\"logo.svg\" alt=\"MovieFlix Logo\" class=\"logo\">
+                <img src=\"Resources/Images/logo.svg\" alt=\"MovieFlix Logo\" class=\"logo\">
                 <div class=\"menu\">
                     <div class=\"menu-item\">
                         <a href=\"index.html\" style=\"text-decoration: none; color: inherit;\">Főoldal</a>
@@ -880,14 +880,14 @@ echo "<!DOCTYPE html>
                         </div>  
                     
                     <div class=\"Age_Restr\" style=\"display: flex; justify-content: flex-start; align-items: center;\">
-                        <img src=\"{$Film_Korhatar_Magyar}.png\"
+                        <img src=\"Resources/Images/{$Film_Korhatar_Magyar}.png\"
                             alt=\"Korhatár\" class=\"korhatar\">
                         <div class=\"film-description\">{$Film_besorolas_szoveg}</div>
                         
                     </div>
                     <div class=\"buttons\">
                         <button class=\"button button-watch\" id=\"openModalBtn\">Megtekintem</button>
-                        <button class=\"button button\" onclick=\"window.location.href='upcNEW.php?MovieID={$IMDBCode}'\">Előzetes megtekintése</button>
+                        <button class=\"button button\" onclick=\"window.location.href='upc/upcNEW.php?MovieID={$IMDBCode}'\">Előzetes megtekintése</button>
                         <button class=\"button button-add\" id=\"AddtoFavorites\">"; echo $Film_Kedvenc? "Hozzáadva kedvencekhez" : "Kedvencekhez adás"; echo "</button>
                     </div>
                     <script>

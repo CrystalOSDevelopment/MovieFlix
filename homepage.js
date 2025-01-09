@@ -13,7 +13,7 @@ function Search(event) {
 
     document.getElementById('loader').style.display = 'flex'; // Shows the loader
 
-    fetch(`index.php`, {
+    fetch(`LinkCatcher.php`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'

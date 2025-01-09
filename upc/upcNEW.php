@@ -39,7 +39,7 @@
     <meta charset="utf-8" />
     <title>UPC Videótár</title>
     <link rel="stylesheet" href="globals.css" />
-    <link rel="stylesheet" href="style3.css" />
+    <link rel="stylesheet" href="../Resources/Styles/style3.css" />
     </head>
     <style>
         body {
@@ -118,7 +118,7 @@
     </script>
 
       <div style="position: absolute;">
-          <img id="myImage" style="transform: scale(1.9); left: 50%; position: relative; margin-top: 10%; border:0px solid black;" src="upc/press5.png" alt="PRESS" width="300px" height="auto">
+          <img id="myImage" style="transform: scale(1.9); left: 50%; position: relative; margin-top: 10%; border:0px solid black;" src="press5.png" alt="PRESS" width="300px" height="auto">
       </div>
 
       <div class="frame">
@@ -127,7 +127,7 @@
         <div class="overlap">
         <div class="overlap-group">
         <div class="rectangle"></div>
-        <img class="union" src="upc/double-arrow.png" />
+        <img class="union" src="double-arrow.png" />
         <div class="text-wrapper">22:11</div>
         <div class="div">Műsor1</div>
         </div>
@@ -136,13 +136,13 @@
         <div class="text-wrapper-2">23:02</div>
         <div class="text-wrapper-3">Műsor2</div>
         </div>
-        <img class="vector" src="upc/arrow.png" />
-        <img class="img" src="upc/arrow.png" style="transform: rotate(-180deg);" />
+        <img class="vector" src="arrow.png" />
+        <img class="img" src="arrow.png" style="transform: rotate(-180deg);" />
         <div class="overlap-3">
-        <img class="group-2" src="upc/hd.png" />
-        <img class="group-3" src="upc/sound.png" />
-        <img class="group-4" src="upc/cc.png" />
-        <img id="fullscreenButton" onclick="openFullscreen();" class="group-5" src="upc/fullscreen.png"/>
+        <img class="group-2" src="hd.png" />
+        <img class="group-3" src="sound.png" />
+        <img class="group-4" src="cc.png" />
+        <img id="fullscreenButton" onclick="openFullscreen();" class="group-5" src="fullscreen.png"/>
         <div class="slider">
         <div class="overlap-group-2">
         <div class="rectangle-3"></div>
@@ -160,20 +160,20 @@
         <div class="overlap-4">
         
         <div class="info">
-        <img class="frutiger-aero-button" src="upc/i.png" />
+        <img class="frutiger-aero-button" src="i.png" />
         <div class="text-wrapper-6">Info</div>
         </div>
         <div class="kiv">
-        <img class="group-6" src="upc/ok.png" />
+        <img class="group-6" src="ok.png" />
         <div class="text-wrapper-7">Kiválaszt</div>
         </div>
         <div class="overlap-5">
         <div class="kiv-2">
-        <img class="group-6" src="upc/txt.png" />
+        <img class="group-6" src="txt.png" />
         <div class="text-wrapper-7">Szöveg</div>
         </div>
         <div class="kiv-3">
-        <img class="group-7" src="upc/blue.png" />
+        <img class="group-7" src="blue.png" />
         <div class="text-wrapper-7">Kedvencek</div>
         </div>
         </div>
@@ -244,7 +244,7 @@
   </script>
 
   <script>
-      var images = ["upc/press.png", "upc/press2.png", "upc/press.png"];
+      var images = ["press.png", "press2.png", "press.png"];
       var currentIndex = 0;
       var showCounter = 0;
       var maxShowCount = 6;
