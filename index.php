@@ -3,6 +3,14 @@
     if(!isset($_SESSION['UName'])){
         header('Location: Login/Login.html');
     }
+
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "links_db";
+
+    // Create connection
+    $conn = new mysqli($servername, $username, $password, $dbname);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -295,6 +303,36 @@
             display: none;
         }
 
+        .HideTab {
+            display: none;
+        }
+
+        .SettingsTab{
+            top: 0;
+            left: 0;
+            max-height: 100vh;
+            margin-top: 40px;
+        }
+
+        .Data{
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: rgba(240, 240, 240, 0.43);
+        }
+
+        th{
+            padding-right: 40px;
+        }
+
+        h4{
+            margin: 10px;
+        }
+
+        a:hover{
+            cursor: pointer;
+        }
+
     </style>
 </head>
 
@@ -308,12 +346,11 @@
             <div class="menu-item" id="Recents">Legutóbbiak</div>
             <div class="menu-item" id="Favorites">Kedvencek</div>
             <!-- <div class="menu-item">Profilom</div> -->
-            <div class="menu-item">Beállítások</div>
+            <div class="menu-item" id="Settings">Beállítások</div>
         </div>
     </div>
     
     <div class="MainBody">
-        
         <div class="SearchOptions">
             <div class="Search">
                 <form id="searchForm">
@@ -345,6 +382,161 @@
             
         </div>
         <div id="movieData" style="margin-top: 40px;display: flex; flex-wrap: wrap;flex-direction: row; max-width: 90%;"></div>
+    </div>
+
+    <div class="SettingsTab HideTab">
+        <div style="text-align: center; background: linear-gradient(0deg, rgb(20, 20, 20) 2%, rgba(20, 20, 20, 0.5) 100%); padding: 40px; padding-top: 0px; padding-right: 0px; width: 90%; margin-left: auto; margin-right: auto; border-radius: 12px; border: 1px solid white">
+            <h2 style="padding-bottom: 20px;">Beállítások</h2>
+            <div style="display: flex;">
+                <div style="text-align:center; max-width: fit-content; margin-left: 40px">
+                    <div id="PFP" style="background-color: white; width: 200px; height: 200px; border-radius: 50%; display: flex; align-items: center; overflow: hidden; border: 1px solid black">
+                        <img src="<?php echo $_SESSION['PFP']; ?>" alt="USER PFP" width="250px">
+                    </div>
+                    <?PHP
+                        echo "<h3>" . $_SESSION['UName'] . "</h3>";
+                    ?>
+                    <p><a style="text-decoration: underline; color: gray; font-style: italic;">Profilkép cseréje</a></p>
+                    <p><a style="text-decoration: underline; color: red; font-style: italic;" id="SignOut">Kilépés</a></p>
+                </div>
+                <div class="Data">
+                    <h3 style="margin-bottom: 40px;">Felhasználói adatok</h3>
+                    <hr>
+                    <table style="margin-left: auto; margin-right: auto; text-align: left;">
+                        <tr>
+                            <th>
+                                <h4>Felhasználónév</h4>
+                            </th>
+                            <td>
+                                <?PHP echo $_SESSION['UName']; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <h4>Jelszó</h4>
+                            </th>
+                            <td>
+                                <a style="text-decoration: underline; color: red; font-style: italic;" id="Change_password">Jelszó módosítása</a>
+                                <div style="display: none;" id="PasswordNew">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <input type="password" placeholder="Jelenlegi jelszó" id="CurrPass" style="margin-top: 10px;">
+                                        <input type="password" placeholder="Új jelszó" id="NewPass1" style="margin-top: 10px;">
+                                        <input type="password" placeholder="Új jelszó megerősítése" id="NewPass2" style="margin-top: 10px;">
+                                        <button style="margin-top: 10px;" id="Save">Mentés</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <h3 style="padding-bottom: 20px; padding-top: 20px;">Statisztika</h3>
+                    <hr>
+                    <table style="margin-left: auto; margin-right: auto; text-align: left;">
+                        <tr>
+                            <th>
+                                <h4>Utoljára megtekintett film</h4>
+                            </th>
+                            <td>
+                                <?PHP
+                                    $stmt = $conn->prepare("SELECT * FROM Users WHERE UName = ?");
+                                    $stmt->bind_param("s", $_SESSION['UName']);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $users = $result->fetch_all(MYSQLI_ASSOC);
+                                    $UserID = $users[0]['UserID'];
+                                    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ? ORDER BY recents.movieID DESC");
+                                    $stmt->bind_param("i", $UserID);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $recents = $result->fetch_all(MYSQLI_ASSOC);
+                                    if(count($recents) > 0){
+                                        $stmt = $conn->prepare("SELECT * FROM links WHERE id = ?");
+                                        $stmt->bind_param("i", $recents[0]['movieID']);
+                                        $stmt->execute();
+                                        $result = $stmt->get_result();
+                                        $movies = $result->fetch_all(MYSQLI_ASSOC);
+                                        echo $movies[0]['movie_title'];
+                                    }
+                                    else{
+                                        echo "Nincs adat";
+                                    }
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <h4>Kedvenc filmek száma</h4>
+                            </th>
+                            <td>
+                                <?PHP
+                                    $stmt = $conn->prepare("SELECT * FROM favorites WHERE userID = ?");
+                                    $stmt->bind_param("i", $UserID);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $favorites = $result->fetch_all(MYSQLI_ASSOC);
+                                    echo count($favorites);
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <h4>Megtekintett filmek száma</h4>
+                            </th>
+                            <td>
+                                <?PHP
+                                    $stmt = $conn->prepare("SELECT * FROM recents WHERE userID = ?");
+                                    $stmt->bind_param("i", $UserID);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $recents = $result->fetch_all(MYSQLI_ASSOC);
+                                    echo count($recents);
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <h4>Kedvenc kategória</h4>
+                            </th>
+                            <td>
+                                <?PHP
+                                    // Get the most common category
+                                    // Join recents movieID on links id
+                                    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ?");
+                                    $stmt->bind_param("i", $UserID);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $recents = $result->fetch_all(MYSQLI_ASSOC);
+                                    $Frequency = array();
+                                    foreach($recents as $recent){
+                                        $ExplodeGenre = explode(",", $recent['Category']);
+                                        foreach($ExplodeGenre as $genre){
+                                            if(array_key_exists($genre, $Frequency)){
+                                                $Frequency[$genre] += 1;
+                                            }
+                                            else{
+                                                $Frequency[$genre] = 1;
+                                            }
+                                        }
+                                    }
+                                    arsort($Frequency);
+                                    // If there are multiple ones with the same frequency, return with all of them
+                                    $Count = 0;
+                                    $Out = "";
+                                    foreach($Frequency as $key => $value){
+                                        if($value >= $Count){
+                                            $Out .= $key . ", ";
+                                            $Count = $value;
+                                        }
+                                        else{
+                                            break;
+                                        }
+                                    }
+                                    echo substr($Out, 0, -2);
+                                ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="loader" style="display: flex;"><div class="spinner"></div></div>
@@ -381,6 +573,72 @@
             event.preventDefault();
             Favorites(event);
         });
+
+        document.getElementById('Settings').addEventListener('click', function(event){
+            event.preventDefault();
+            Settings(event);
+        });
+
+        document.getElementById('Change_password').addEventListener('click', function(event){
+            event.preventDefault();
+            const passwordFields = document.getElementById('PasswordNew');
+            passwordFields.style.display = passwordFields.style.display === 'none' ? 'block' : 'none';
+            const Label = document.getElementById('Change_password');
+            Label.innerText = Label.innerText === 'Jelszó módosítása' ? 'Mégse' : 'Jelszó módosítása';
+        });
+
+        document.getElementById('Save').addEventListener('click', function(event){
+            event.preventDefault();
+            const CurrPass = document.getElementById('CurrPass').value;
+            const NewPass1 = document.getElementById('NewPass1').value;
+            const NewPass2 = document.getElementById('NewPass2').value;
+            if(NewPass1 !== NewPass2){
+                alert('A két jelszó nem egyezik meg!');
+                return;
+            }
+            if(NewPass1.length < 8 || !/[A-Z]/.test(NewPass1) || !/[a-z]/.test(NewPass1) || !/[0-9]/.test(NewPass1) || !/[^a-zA-Z\d]/.test(NewPass1)){
+                alert('A jelszónak legalább 8 karakter hosszúnak kell lennie, tartalmaznia kell legalább egy nagybetűt, egy kisbetűt, egy számot és egy speciális karaktert!');
+                return;
+            }
+            const data = new FormData();
+            data.append('CurrPass', CurrPass);
+            data.append('NewPass', NewPass1);
+            fetch('Login/ChangePassword.php', {
+                method: 'POST',
+                body: data
+            }).then(response => response.text()).then(data => {
+                if(data === '4'){
+                    alert('A jelszó sikeresen megváltozott!');
+                }
+                else if(data === '0'){
+                    alert('A jelszó megváltoztatása sikertelen!');
+                }
+                else if(data === '1'){
+                    alert('A felhasználó nem létezik!');
+                }
+                else if(data === '2'){
+                    alert('A jelenlegi jelszó nem megfelelő!');
+                }
+                else if(data === '3'){
+                    alert('A jelenlegi jelszó vagy az új jelszó üres!');
+                }
+            });
+        });
+
+        document.getElementById('SignOut').addEventListener('click', function(event){
+            event.preventDefault();
+            // Run the logout script in the background
+            fetch('Login/Logout.php')
+            .then(response => response.text())
+            .then(data => {
+                if(data === '0'){
+                    alert('Sikertelen kijelentkezés!');
+                }
+                else if(data === '1'){
+                    window.location.href = 'Login/Login.html';
+                }
+            });
+        });
     </script>
     <script>
         let Options = document.querySelectorAll('.Option');
@@ -416,6 +674,10 @@
                 break;
             case 'Favorites':
                 Favorites(event);
+                break;
+            case 'Settings':
+                Settings(event);
+                break;
             default:
                 break;
         }

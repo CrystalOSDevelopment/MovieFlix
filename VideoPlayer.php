@@ -234,21 +234,28 @@ if ($MovieID) {
 }
 
 // Finally add the id of the film to recents table
-// First check if the record already exists
+// First read the user ID
+$UName = $_SESSION['UName'];
+$stmt = $pdo->prepare("SELECT * FROM Users WHERE UName = :UName");
+$stmt->execute(['UName' => $UName]);
+$User = $stmt->fetch(PDO::FETCH_ASSOC);
+$UserID = $User['UserID'];
+
+// Then check if the record already exists
 $stmt = $pdo->prepare("SELECT Count(*) FROM recents WHERE movieID = :id");
 $stmt->execute(['id' => $MovieID]);
 $movie = $stmt->fetch(PDO::FETCH_ASSOC);
 if($movie['Count(*)'] == 0) {
-    $stmt = $pdo->prepare("INSERT INTO recents (movieID) VALUES (:id)");
-    $stmt->execute(['id' => $MovieID]);
+    $stmt = $pdo->prepare("INSERT INTO recents (movieID, userID) VALUES (:id, :userID)");
+    $stmt->execute(['id' => $MovieID, 'userID' => $UserID]);
 }
 else{
     // Move the record to the top by deleting and re-inserting it
     $stmt = $pdo->prepare("DELETE FROM recents WHERE movieID = :id");
     $stmt->execute(['id' => $MovieID]);
 
-    $stmt = $pdo->prepare("INSERT INTO recents (movieID) VALUES (:id)");
-    $stmt->execute(['id' => $MovieID]);
+    $stmt = $pdo->prepare("INSERT INTO recents (movieID, userID) VALUES (:id, :userID)");
+    $stmt->execute(['id' => $MovieID, 'userID' => $UserID]);
 }
 
 // Age limit from OMDB. Can be placed in LinkCatcher.php

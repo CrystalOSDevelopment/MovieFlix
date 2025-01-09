@@ -4,6 +4,10 @@ function Search(event) {
     const searchTerm = document.getElementById('SearchTerm').value;
     //const type = document.getElementById('type').value;
 
+    const Body = document.getElementsByClassName('SettingsTab');
+    // Add a class to the body
+    Body[0].classList.add('HideTab');
+
     const year = 0;
     const type = "";
 
@@ -103,6 +107,15 @@ function Search(event) {
 
 // In case there is a problem with the recents, search in this function
 function Recents(event){
+    // Clear everything from MainBody
+    const Body = document.getElementsByClassName('MainBody');
+    // Add a class to the body
+    Body[0].classList.remove('HideTab');
+
+    const Body2 = document.getElementsByClassName('SettingsTab');
+    // Add a class to the body
+    Body2[0].classList.add('HideTab');
+
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
     movieDataDiv.style.display = 'flex';
@@ -182,6 +195,15 @@ function Recents(event){
 
 // In case there is a problem with the favorites, search in this function
 function Favorites(event){
+    // Clear everything from MainBody
+    const Body = document.getElementsByClassName('MainBody');
+    // Add a class to the body
+    Body[0].classList.remove('HideTab');
+
+    const Body2 = document.getElementsByClassName('SettingsTab');
+    // Add a class to the body
+    Body2[0].classList.add('HideTab');
+
     const movieDataDiv = document.getElementById('movieData');
     // Give it style
     movieDataDiv.style.display = 'flex';
@@ -257,4 +279,17 @@ function Favorites(event){
         });
     })
     .catch(error => console.error('Error:', error));
+}
+
+// In case there is a problem with the settings, search in this function
+function Settings(event){
+    // Clear everything from MainBody
+    const Body = document.getElementsByClassName('MainBody');
+    // Add a class to the body
+    Body[0].classList.add('HideTab');
+
+    // Add the settings page
+    const SettingsTab = document.getElementsByClassName('SettingsTab');
+    // Remove the class from the settings page
+    SettingsTab[0].classList.remove('HideTab');
 }

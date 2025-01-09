@@ -46,6 +46,7 @@
             // Start the session
             session_start();
             $_SESSION['UName'] = $UName;
+            $_SESSION['PFP'] = $row['PFP'];
             // $_SESSION['UID'] = $row['UserID'];
             die("4");
         }

@@ -1,5 +1,10 @@
 <?php
 
+session_start();
+if(!isset($_SESSION['UName'])) {
+    header('Location: Login/Login.html');
+}
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -21,6 +26,15 @@ $wantRecents = isset($_GET['wantRecents']) ? $_GET['wantRecents'] : '';
 $addtoFavorites = isset($_GET['addtoFavorites']) ? $_GET['addtoFavorites'] : '';
 $deleteMovie = isset($_GET['deleteMovie']) ? $_GET['deleteMovie'] : ''; // This is an movieID
 $wantFavorites = isset($_GET['wantFavorites']) ? $_GET['wantFavorites'] : '';
+
+$UserID = 0;
+
+$stmt = $conn->prepare("SELECT * FROM Users WHERE UName = ?");
+$stmt->bind_param("s", $_SESSION['UName']);
+$stmt->execute();
+$result = $stmt->get_result();
+$users = $result->fetch_all(MYSQLI_ASSOC);
+$UserID = $users[0]['UserID'];
 
 $Command = "";
 
@@ -84,12 +98,13 @@ else if($Command != "") {
 else if($wantRecents != "") {
     // Join recents and links tables to get the most recent movies
     // Order is in reverse chronological order
-    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id");
+    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ? ORDER BY recents.movieID DESC");
+    $stmt->bind_param("i", $UserID);
 }
 else if($addtoFavorites != "") {
     // Check if the movie is already in the favorites table
-    $stmt = $conn->prepare("SELECT * FROM favorites WHERE movieID = ?");
-    $stmt->bind_param("i", $addtoFavorites);
+    $stmt = $conn->prepare("SELECT * FROM favorites WHERE movieID = ? AND userID = ?");
+    $stmt->bind_param("ii", $addtoFavorites, $UserID);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -97,15 +112,15 @@ else if($addtoFavorites != "") {
 
     if(count($movies) == 0) {
         // If the movie is not in the favorites table, add it
-        $stmt = $conn->prepare("INSERT INTO favorites (movieID) VALUES (?)");
-        $stmt->bind_param("i", $addtoFavorites);
+        $stmt = $conn->prepare("INSERT INTO favorites (movieID, userID) VALUES (?, ?)");
+        $stmt->bind_param("ii", $addtoFavorites, $UserID);
         $stmt->execute();
         echo "true";
     }
     else {
         // If the movie is already in the favorites table, remove it
-        $stmt = $conn->prepare("DELETE FROM favorites WHERE movieID = ?");
-        $stmt->bind_param("i", $addtoFavorites);
+        $stmt = $conn->prepare("DELETE FROM favorites WHERE movieID = ? AND userID = ?");
+        $stmt->bind_param("ii", $addtoFavorites, $UserID);
         $stmt->execute();
         echo "false";
     }
@@ -148,7 +163,8 @@ else if($deleteMovie != "") {
 }
 else if($wantFavorites != "") {
     // Join favorites and links tables to get the favorite movies
-    $stmt = $conn->prepare("SELECT * FROM favorites JOIN links ON favorites.movieID = links.id");
+    $stmt = $conn->prepare("SELECT * FROM favorites JOIN links ON favorites.movieID = links.id WHERE favorites.userID = ?");
+    $stmt->bind_param("i", $UserID);
 }
 else {
     $stmt = $conn->prepare("SELECT * FROM links WHERE movie_title LIKE ? " . ($orderBy != "" ? "ORDER BY " . $orderBy : ""));
