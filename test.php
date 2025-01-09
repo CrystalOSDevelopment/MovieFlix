@@ -111,7 +111,7 @@
                     else{
                         // Call OMDB API, but only if we have an IMDB ID and a local movie file
                         if($IMDB_ID != ""){
-                            $API_Key = "37daa229";
+                            $API_Key = "";
                             $OMDB_URL = "http://www.omdbapi.com/?apikey=" . $API_Key . "&i=" . $IMDB_ID;
                             $OMDB_JSON = file_get_contents($OMDB_URL);
                             $OMDB_Data = json_decode($OMDB_JSON, true);
@@ -134,19 +134,19 @@
                             foreach ($OMDB_Data['Ratings'] as $rating) {
                                 echo $rating['Source'] . ": " . $rating['Value'] . "<br>";
                             }
+                            // Try playing it in the browser
+                            echo '<video id="my-video" class="video-js" controls preload="auto" width="640" height="360"
+                                        data-setup=\'{}\'>
+                                        <source src="https://5xhm2rv4-443.euw.devtunnels.ms/movies/' . $file . '/' . $subfile . '" type="video/webm"> <!-- Replace with the file path -->
+                                        <p class="vjs-no-js">
+                                            To view this video please enable JavaScript, and consider upgrading to a
+                                            web browser that
+                                            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                                        </p>
+                                    </video>';
                             $IMDB_ID = "";
                         }
 
-                        // Try playing it in the browser
-                        echo '<video id="my-video" class="video-js" controls preload="auto" width="640" height="360"
-                                    data-setup=\'{}\'>
-                                    <source src="https://5xhm2rv4-443.euw.devtunnels.ms/movies/' . $file . '/' . $subfile . '" type="video/webm"> <!-- Replace with the file path -->
-                                    <p class="vjs-no-js">
-                                        To view this video please enable JavaScript, and consider upgrading to a
-                                        web browser that
-                                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-                                    </p>
-                                </video>';
                     }
                 }
             }

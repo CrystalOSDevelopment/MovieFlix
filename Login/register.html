@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regisztráció</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="Register.css">
+</head>
+<body>
+    <div class="Form-Container">
+        <div class="Coupling-div">
+            <div class="Left-Side" style="max-width: 300px;">
+                <img src="../logo.svg" alt="logo" style="max-width: 300px;">
+                <p>
+                    Csatlakozzon ingyenes filmtárhelyünkhöz és élvezze a reklámmentesség élményét velünk! Naponta frissülő
+                    adatbázisunkból mostanra több mint 1000 filmet nézhet meg bárhol, bármikor!
+                </p>
+            </div>
+            <form id="registerForm">
+                <h2>Regisztráció</h2>
+                <P id="response"></P>
+                <input type="text" name="UName" placeholder="Felhasználónév" required>
+                <input type="password" name="Pass" placeholder="Jelszó" required>
+                <input type="password" name="Pass2" placeholder="Jelszó újra" required>
+                <input type="submit" value="Regisztráció">
+                <a href="login.html">Már felhasználó?</a>
+            </form>
+        </div>
+    
+        <script>
+            $(document).ready(function() {
+                $('#registerForm').on('submit', function(event) {
+                    event.preventDefault(); // Prevent the form from submitting the traditional way
+    
+                    $.ajax({
+                        url: 'register.php',
+                        type: 'post',
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            switch(response){
+                                case '0':
+                                    response = 'Sikertelen kapcsolódás az adatbázishoz!';
+                                    break;
+                                case '1':
+                                    response = 'Ilyen felhsználónév már létezik!';
+                                    break;
+                                case '2':
+                                    response = 'A jelszó nem elég erős!';
+                                    break;
+                                case '3':
+                                    response = 'Nem megfelelő felhasználónév vagy jelszó!';
+                                    break;
+                                case '4':
+                                    response = 'Sikeres regisztráció!';
+                                    break;
+                                case '5':
+                                    response = 'A jelszavak nem egyeznek!';
+                                    break;
+                            }
+                            $('#response').html(response); // Display the response in the #response div
+                            $('#response').css('display', 'block'); // Display the #response div
+                        }
+                    });
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

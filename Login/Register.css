@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+}
+
+/* Form design */
+.Form-Container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: rgb(98, 98, 98);
+}
+
+#registerForm {
+    width: 100%;
+    max-width: 400px; /* Set a maximum width for the form */
+    display: block;
+    padding: 20px;
+    border-radius: 0px 10px 10px 0px;
+    background-color: rgb(69, 69, 69);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
+.Coupling-div{
+    display: flex;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.Coupling-div > .Left-Side{
+    padding: 20px;
+    text-align: center;
+    font-style: italic;
+}
+
+#registerForm > input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+}
+
+#registerForm > a {
+    display: block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: rgb(255, 112, 112);
+}
+
+/* Error message design */
+
+#response {
+    display: none;
+    background-color: #f44336;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+}

@@ -1,4 +1,10 @@
 <?php
+
+session_start();
+if(!isset($_SESSION['UName'])){
+   header("Location: Login/Login.html");
+}
+
 require 'vendor/autoload.php';
 
 use GuzzleHttp\Client;
@@ -55,7 +61,7 @@ if ($MovieID) {
             // Trace back the IMDB data
             $IMDB_BaseLink = "https://www.imdb.com";
             $imdbLink = $IMDB_BaseLink . "/title/" . str_replace(" ", "+", $IMDBCode);
-            //echo "<br><a href=\"" . $imdbLink . "\">IMDB Link</a>";
+            // echo "<br><a href=\"" . $imdbLink . "\">IMDB Link</a>";
 
             $NeedsUpdate = false;
             // Check if the database has a record for the trailer link
@@ -200,14 +206,16 @@ if ($MovieID) {
 
             // Export the video from the new source from the video tag
             if ($ExportLink !== "") {
-                while($Film_Link === ""){
+                $Attempts = 0;
+                while($Film_Link === "" && $Attempts < 4){
                     $ExportLink = exec("node index.js " . escapeshellarg($ExportLink));
                     if(str_contains($ExportLink, 'Error') !== true){
                         $Film_Link = $ExportLink;
                     }
+                    $Attempts++;
                 }
-                // $ExportLink = exec("node index.js " . escapeshellarg($BestLink));
-                // $Film_Link = $ExportLink;
+                $ExportLink = exec("node index.js " . escapeshellarg($BestLink));
+                $Film_Link = $ExportLink;
             }
 
             // Update the trailer link in the database with the new link
