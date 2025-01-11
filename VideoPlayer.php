@@ -259,7 +259,7 @@ else{
 }
 
 // Age limit from OMDB. Can be placed in LinkCatcher.php
-$apikey = "37daa229"; // Your OMDB API key here
+$apikey = ""; // Your OMDB API key here
 $FetchedOMDBData = file_get_contents("http://www.omdbapi.com/?i=" . $IMDBCode . "&apikey=" . $apikey);
 $OMDBData = json_decode($FetchedOMDBData, true);
 $Film_Korhatar = $OMDBData['Rated'];

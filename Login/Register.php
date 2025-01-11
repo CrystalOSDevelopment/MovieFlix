@@ -13,6 +13,7 @@
     $UName = isset($_POST['UName']) ? $_POST['UName'] : '';
     $Pass = isset($_POST['Pass']) ? $_POST['Pass'] : ''; 
     $Pass2 = isset($_POST['Pass2']) ? $_POST['Pass2'] : '';
+    $Email = isset($_POST['Email']) ? $_POST['Email'] : '';
     
     // If the passwords do not match instantly return
     if($Pass != $Pass2){
@@ -53,17 +54,17 @@
         if(strlen($Pass) < 8 || !preg_match('/[A-Z]/', $Pass) || !preg_match('/[a-z]/', $Pass) || !preg_match('/[0-9]/', $Pass) || !preg_match('/[^a-zA-Z\d]/', $Pass)){
             die("2");
         }
-        else if($UName == "" || $Pass == ""){
+        else if($UName == "" || $Pass == "" || $Email == ""){
             die("3");
         }
         // Encrypt the password
         $hashedPass = password_hash($Pass, PASSWORD_DEFAULT);
 
         // Insert the user into the database
-        $sql = "INSERT INTO Users (UName, Pass) VALUES ('$UName', '$hashedPass')";
+        $sql = "INSERT INTO Users (UName, Email, Pass) VALUES ('$UName', '$Email','$hashedPass')";
 
         if ($conn->query($sql) === TRUE) {
-            echo "4";
+            die("4");
             $ProceedLogin = true;
         } else {
             die("Error: " . $sql . "<br>" . $conn->error);

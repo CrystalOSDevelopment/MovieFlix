@@ -25,6 +25,8 @@
         body{
             background-image: linear-gradient(-120deg, #101010 55%, #6FBAFF 100%);
             background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             min-height: 100vh;
         }
         .header {
@@ -316,9 +318,9 @@
 
         .Data{
             width: 70%;
-            margin-left: auto;
             margin-right: auto;
             background-color: rgba(240, 240, 240, 0.43);
+            padding-top: 5px;
         }
 
         th{
@@ -333,6 +335,61 @@
             cursor: pointer;
         }
 
+        .MainContainer{
+            text-align: center;
+            background: linear-gradient(0deg, rgb(20, 20, 20) 2%, rgba(20, 20, 20, 0.5) 100%);
+            padding-right: 0px;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 12px;
+            border: 1px solid white;
+            overflow: hidden;
+        }
+
+        .MobileUI{
+            display: flex;
+        }
+
+        .UserProfile{
+            text-align:center;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Settings mobile view */
+        @media (max-width: 768px) {
+            .MobileUI{
+                display: block;
+            }
+            #PFP{
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .MainContainer{
+                padding: 0px;
+            }
+            .Data{
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 320px) {
+            th{
+                padding-right: 0px;
+            }
+            td{
+                max-width: 120px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            th{
+                padding-right: 0px;
+            }
+        }
+
     </style>
 </head>
 
@@ -340,9 +397,7 @@
     <div class="header">
         <img src="Resources/Images/logo.svg" alt="MovieFlix Logo" class="logo">
         <div class="menu">
-            <div class="menu-item" id="MainPage">
-                <a href="index.php" style="text-decoration: none; color: inherit;">Főoldal</a>
-            </div>
+            <div class="menu-item" id="MainPage">Főoldal</div>
             <div class="menu-item" id="Recents">Legutóbbiak</div>
             <div class="menu-item" id="Favorites">Kedvencek</div>
             <!-- <div class="menu-item">Profilom</div> -->
@@ -385,17 +440,21 @@
     </div>
 
     <div class="SettingsTab HideTab">
-        <div style="text-align: center; background: linear-gradient(0deg, rgb(20, 20, 20) 2%, rgba(20, 20, 20, 0.5) 100%); padding: 40px; padding-top: 0px; padding-right: 0px; width: 90%; margin-left: auto; margin-right: auto; border-radius: 12px; border: 1px solid white">
+        <div class="MainContainer">
             <h2 style="padding-bottom: 20px;">Beállítások</h2>
-            <div style="display: flex;">
-                <div style="text-align:center; max-width: fit-content; margin-left: 40px">
+            <div class="MobileUI">
+                <div class="UserProfile">
                     <div id="PFP" style="background-color: white; width: 200px; height: 200px; border-radius: 50%; display: flex; align-items: center; overflow: hidden; border: 1px solid black">
                         <img src="<?php echo $_SESSION['PFP']; ?>" alt="USER PFP" width="250px">
                     </div>
                     <?PHP
                         echo "<h3>" . $_SESSION['UName'] . "</h3>";
                     ?>
-                    <p><a style="text-decoration: underline; color: gray; font-style: italic;">Profilkép cseréje</a></p>
+                    <p><a style="text-decoration: underline; color: gray; font-style: italic;" id="PFPChange">Profilkép cseréje</a></p>
+                    <div style="display: none; max-width: 99%" id="LinkPFP">
+                        <input type="link" placeholder="Profilkép linkje" id="PFPChangeLink" style="margin-bottom: 20px;">
+                        <button id="PFPChangeSave">Mentés</button>
+                    </div>
                     <p><a style="text-decoration: underline; color: red; font-style: italic;" id="SignOut">Kilépés</a></p>
                 </div>
                 <div class="Data">
@@ -529,7 +588,12 @@
                                             break;
                                         }
                                     }
-                                    echo substr($Out, 0, -2);
+                                    if(substr($Out, 0, -2) == ""){
+                                        echo "Nincs adat";
+                                    }
+                                    else{
+                                        echo substr($Out, 0, -2);
+                                    }
                                 ?>
                             </td>
                         </tr>
@@ -559,6 +623,11 @@
 
     </script>
     <script>
+        document.getElementById('MainPage').addEventListener('click', function(event){
+            event.preventDefault();
+            Recommendations(event);
+        });
+
         document.getElementById('searchForm').addEventListener('submit', function(event) { // Change submit to click and it'll do real time search (tinkering with the code is needed to it tho)
             event.preventDefault();
             Search(event);
@@ -639,6 +708,37 @@
                 }
             });
         });
+
+        document.getElementById('PFPChange').addEventListener('click', function(){
+            if(document.getElementById('LinkPFP').style.display === 'none'){
+                document.getElementById('LinkPFP').style.display = 'block';
+            }
+            else{
+                document.getElementById('LinkPFP').style.display = 'none';
+            }
+        });
+
+        document.getElementById('PFPChangeSave').addEventListener('click', function(){
+            const Link = document.getElementById('PFPChangeLink').value;
+            const data = new FormData();
+            data.append('PFP', Link);
+            data.append('UName', '<?PHP echo $_SESSION['UName']; ?>');
+            fetch('Login/ChangePFP.php', {
+                method: 'POST',
+                body: data
+            }).then(response => response.text()).then(data => {
+                if(data === '1'){
+                    alert('A profilkép sikeresen megváltozott!');
+                    document.getElementById('PFP').innerHTML = "<img src='" + Link + "' alt='USER PFP' width='250px'>";
+                }
+                else {
+                    alert('A profilkép megváltoztatása sikertelen!');
+                }
+
+                // Hide the input field
+                document.getElementById('LinkPFP').style.display = 'none';
+            });
+        });
     </script>
     <script>
         let Options = document.querySelectorAll('.Option');
@@ -679,6 +779,7 @@
                 Settings(event);
                 break;
             default:
+                Recommendations(event);
                 break;
         }
     </script>

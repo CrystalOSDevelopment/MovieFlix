@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regisztráció</title>
+    <title>Bejelentkezés</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="Register.css">
 </head>
 <body>
-    <div class="Form-Container">
+
+    <!-- This is for desktop mode -->
+    <div class="Form-Container Desktop">
         <div class="Coupling-div">
-            <div class="Left-Side" style="max-width: 300px;">
-                <img src="../Resources/Images/logo.svg" alt="logo" style="max-width: 300px;">
+            <div class="Left-Side" style="width: 50%;">
+                <img src="../Resources/Images/logo.svg" alt="logo" style="max-width: 100%">
                 <p>
                     Csatlakozzon ingyenes filmtárhelyünkhöz és élvezze a reklámmentesség élményét velünk! Naponta frissülő
                     adatbázisunkból mostanra több mint 1000 filmet nézhet meg bárhol, bármikor!
                 </p>
             </div>
-            <form id="registerForm">
-                <h2>Bejelenkezés</h2>
+            <form id="registerForm" method="POST">
+                <h2>Bejelentkezés</h2>
                 <P id="response"></P>
                 <input type="text" name="UName" placeholder="Felhasználónév" required>
                 <input type="password" name="Pass" placeholder="Jelszó" required>
@@ -26,45 +28,66 @@
                 <a href="register.html">Még nem tag?</a>
             </form>
         </div>
-    
-        <script>
-            $(document).ready(function() {
-                $('#registerForm').on('submit', function(event) {
-                    event.preventDefault(); // Prevent the form from submitting the traditional way
-    
-                    $.ajax({
-                        url: 'Login.php',
-                        type: 'post',
-                        data: $(this).serialize(),
-                        success: function(response) {
-                            switch(response){
-                                case '0':
-                                    response = 'Sikertelen kapcsolódás az adatbázishoz!';
-                                    break;
-                                case '1':
-                                    response = 'Ilyen felhsználónév nem található!';
-                                    break;
-                                case '2':
-                                    response = 'Nem megfelelő felhasználónév vagy jelszó!';
-                                    break;
-                                case '3':
-                                    response = 'Nem megfelelő felhasználónév vagy jelszó!';
-                                    break;
-                                case '4':
-                                    response = 'Sikeres belépés!';
-                                    break;
-                            }
-                            $('#response').html(response); // Display the response in the #response div
-                            $('#response').css('display', 'block'); // Display the #response div
+    </div>
 
-                            if(response == 'Sikeres belépés!'){
-                                window.location.href = '../index.php';
-                            }
+    <!-- This is for mobile mode -->
+    <div class="Form-Container Mobile">
+        <div class="Coupling-div">
+            <form id="registerForm" method="POST">
+                <h2>Bejelentkezés</h2>
+                <P id="response"></P>
+                <input type="text" name="UName" placeholder="Felhasználónév" required>
+                <input type="password" name="Pass" placeholder="Jelszó" required>
+                <input type="submit" value="Bejelentkezés">
+                <a href="register.html">Még nem tag?</a>
+            </form>
+            <div class="Left-Side" style="max-width: 300px; margin-left: auto; margin-right: auto;">
+                <img src="../Resources/Images/logo.svg" alt="logo" style="max-width: 100%;">
+                <p>
+                    Csatlakozzon ingyenes filmtárhelyünkhöz és élvezze a reklámmentesség élményét velünk! Naponta frissülő
+                    adatbázisunkból mostanra több mint 1000 filmet nézhet meg bárhol, bármikor!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#registerForm').on('submit', function(event) {
+                event.preventDefault(); // Prevent the form from submitting the traditional way
+
+                $.ajax({
+                    url: 'Login.php',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        switch(response){
+                            case '0':
+                                response = 'Sikertelen kapcsolódás az adatbázishoz!';
+                                break;
+                            case '1':
+                                response = 'Ilyen felhsználónév nem található!';
+                                break;
+                            case '2':
+                                response = 'Nem megfelelő felhasználónév vagy jelszó!';
+                                break;
+                            case '3':
+                                response = 'Nem megfelelő felhasználónév vagy jelszó!';
+                                break;
+                            case '4':
+                                response = 'Sikeres belépés!';
+                                break;
                         }
-                    });
+                        $('#response').html(response); // Display the response in the #response div
+                        $('#response').css('display', 'block'); // Display the #response div
+
+                        if(response == 'Sikeres belépés!'){
+                            window.location.href = '../index.php';
+                        }
+                    }
                 });
             });
-        </script>
-    </div>
+        });
+    </script>
 </body>
 </html>

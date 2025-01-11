@@ -2,7 +2,8 @@
     "require": {
         "mongodb/mongodb": "^1.20",
         "guzzlehttp/guzzle": "^7.9",
-        "voku/simple_html_dom": "^4.8"
+        "voku/simple_html_dom": "^4.8",
+        "phpmailer/phpmailer": "^6.9"
     },
     "require-dev": {
         "nesk/puphpeteer": "^2.0"

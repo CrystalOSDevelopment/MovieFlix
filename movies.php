@@ -26,6 +26,7 @@ $wantRecents = isset($_GET['wantRecents']) ? $_GET['wantRecents'] : '';
 $addtoFavorites = isset($_GET['addtoFavorites']) ? $_GET['addtoFavorites'] : '';
 $deleteMovie = isset($_GET['deleteMovie']) ? $_GET['deleteMovie'] : ''; // This is an movieID
 $wantFavorites = isset($_GET['wantFavorites']) ? $_GET['wantFavorites'] : '';
+$wantSimilar = isset($_GET['wantSimilar']) ? $_GET['wantSimilar'] : '';
 
 $UserID = 0;
 
@@ -165,6 +166,40 @@ else if($wantFavorites != "") {
     // Join favorites and links tables to get the favorite movies
     $stmt = $conn->prepare("SELECT * FROM favorites JOIN links ON favorites.movieID = links.id WHERE favorites.userID = ?");
     $stmt->bind_param("i", $UserID);
+}
+else if($genre != "") {
+    $stmt = $conn->prepare("SELECT * FROM links WHERE Category LIKE \"%" . $genre . "%\"" . ($orderBy != "" ? "ORDER BY " . $orderBy : "") . " LIMIT 8");
+}
+else if($wantSimilar != "") {
+    // Get the most common category
+    // Join recents movieID on links id
+    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ?");
+    $stmt->bind_param("i", $UserID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $recents = $result->fetch_all(MYSQLI_ASSOC);
+    $Frequency = array();
+    foreach($recents as $recent){
+        $ExplodeGenre = explode(",", $recent['Category']);
+        foreach($ExplodeGenre as $genre){
+            if(array_key_exists($genre, $Frequency)){
+                $Frequency[$genre] += 1;
+            }
+            else{
+                $Frequency[$genre] = 1;
+            }
+        }
+    }
+    arsort($Frequency);
+    // If there are multiple ones with the same frequency, return with all of them
+    $Count = 0;
+    $Out = "";
+    foreach($Frequency as $key => $value){
+        $Out .= $key . ", ";
+        $Count = $value;
+    }
+    echo substr($Out, 0, -2);
+    return;
 }
 else {
     $stmt = $conn->prepare("SELECT * FROM links WHERE movie_title LIKE ? " . ($orderBy != "" ? "ORDER BY " . $orderBy : ""));

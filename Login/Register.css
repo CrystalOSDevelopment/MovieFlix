@@ -12,8 +12,6 @@ body {
 }
 
 #registerForm {
-    width: 100%;
-    max-width: 400px; /* Set a maximum width for the form */
     display: block;
     padding: 20px;
     border-radius: 0px 10px 10px 0px;
@@ -22,13 +20,16 @@ body {
     color: white;
 }
 
-.Coupling-div{
+.Coupling-div {
     display: flex;
     background-color: white;
     border-radius: 10px;
+    width: 60%;
+    max-width: 900px;
+    flex-direction: row;
 }
 
-.Coupling-div > .Left-Side{
+.Coupling-div > .Left-Side {
     padding: 20px;
     text-align: center;
     font-style: italic;
@@ -51,11 +52,62 @@ body {
 }
 
 /* Error message design */
-
 #response {
     display: none;
     background-color: #f44336;
     color: white;
     padding: 10px;
     margin: 10px 0;
+}
+
+.Mobile{
+    display: none;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    .Coupling-div {
+        flex-direction: column;
+        width: 80%;
+    }
+
+    .Coupling-div > .Left-Side {
+        max-width: 100%;
+    }
+
+    #registerForm {
+        border-radius: 0px;
+    }
+
+    .Desktop{
+        display: none;
+    }
+
+    .Mobile{
+        display: flex;
+    }
+}
+
+@media (max-width: 480px) {
+    .Coupling-div {
+        width: 90%;
+    }
+
+    #registerForm {
+        padding: 15px;
+    }
+
+    #registerForm > input {
+        padding: 8px;
+    }
+
+    #registerForm > a {
+        margin-top: 15px;
+    }
+}
+
+@media (min-width: 769px) {
+    #registerForm {
+        width: 50%;
+    }
 }
