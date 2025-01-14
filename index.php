@@ -390,6 +390,12 @@
             }
         }
 
+        .AutoCompleteItem{
+            width: 90%;
+            padding: 10px;
+            display: flex;
+        }
+
     </style>
 </head>
 
@@ -412,6 +418,7 @@
                     <input type="submit" value="" id="fetchAllRecords">
                     <input type="text" id="SearchTerm" name="SearchTerm" placeholder="" value="">
                 </form>
+                <div id="AutoComplete" style="position:static; display: none; margin-left: auto; margin-right: auto;"></div>
             </div>
             <div class="Categories">
                 <div class="categories-header" onclick="toggleCategories()">
@@ -744,6 +751,64 @@
             // On keypress, read in the 5 most accurate movies from the database
             if (document.getElementById('SearchTerm').value.length >= 3) {
                 console.log('Searching for ' + document.getElementById('SearchTerm').value);
+
+                document.getElementById('AutoComplete').style.display = 'block';
+
+                // Get json data from movies.php
+                fetch('movies.php?search=' + document.getElementById('SearchTerm').value)
+                .then(response => response.json())
+                .then(data => {
+                    // Clear the autocomplete div
+                    document.getElementById('AutoComplete').innerHTML = '';
+
+                    // Add the data to the autocomplete div
+                    data.forEach(movie => {
+                        const div = document.createElement('div');
+                        // Add class to div
+                        div.classList.add('AutoCompleteItem');
+                        // Add an image to the div
+                        const img = document.createElement('img');
+                        img.src = movie.cover;
+                        img.style.width = '50px';
+                        img.style.height = '75px';
+                        img.style.marginLeft = '10px';
+                        div.appendChild(img);
+
+                        // Add the movie title to the div
+                        const p = document.createElement('p');
+                        // Remove year from title and any other special chars from the end
+                        const titleClean = movie.movie_title = movie.movie_title.replace(/ *\([^)]*\) */g, "");
+
+                        // Create a subdiv
+                        const subDiv = document.createElement('div');
+                        p.innerText = titleClean;
+                        p.style = 'margin-top: 5px; margin-left: 10px; font-size: 16px;';
+                        subDiv.appendChild(p);
+
+                        // Write out release date
+                        const p2 = document.createElement('p');
+                        p2.innerText = "Megjelenés éve: " + movie.release_date;
+                        p2.style = 'margin-top: -5px; margin-left: 10px; font-size: 12px;';
+                        subDiv.appendChild(p2);
+
+                        div.appendChild(subDiv);
+
+                        div.addEventListener('click', function() {
+                            document.getElementById('SearchTerm').value = movie.movie_title;
+                            document.getElementById('AutoComplete').style.display = 'none';
+                        });
+                        document.getElementById('AutoComplete').appendChild(div);
+                        const line = document.createElement('hr');
+                        line.style.marginTop = '0px';
+                        document.getElementById('AutoComplete').appendChild(line);
+                    });
+                });
+            }
+            else if(document.getElementById('SearchTerm').value.length === 0){
+                // Clear the search results
+                console.log('Clearing search results');
+
+                document.getElementById('AutoComplete').style.display = 'none';
             }
         });
     </script>
