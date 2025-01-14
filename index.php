@@ -625,7 +625,7 @@
     <script>
         document.getElementById('MainPage').addEventListener('click', function(event){
             event.preventDefault();
-            Recommendations(event);
+            // Recommendations(event);
         });
 
         document.getElementById('searchForm').addEventListener('submit', function(event) { // Change submit to click and it'll do real time search (tinkering with the code is needed to it tho)
@@ -738,6 +738,13 @@
                 // Hide the input field
                 document.getElementById('LinkPFP').style.display = 'none';
             });
+        });
+
+        document.getElementById('SearchTerm').addEventListener('input', function(event) {
+            // On keypress, read in the 5 most accurate movies from the database
+            if (document.getElementById('SearchTerm').value.length >= 3) {
+                console.log('Searching for ' + document.getElementById('SearchTerm').value);
+            }
         });
     </script>
     <script>

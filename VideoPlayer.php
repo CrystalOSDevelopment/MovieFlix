@@ -8,6 +8,7 @@ if(!isset($_SESSION['UName'])){
 require 'vendor/autoload.php';
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Promise;
 
 $httpClient = new Client([
     'headers' => [
@@ -84,146 +85,120 @@ if ($MovieID) {
                 // If the record is over 2 hours old, update it
                 if ($Difference > 7200) {
                     $NeedsUpdate = true;
-                }
-                else{
+                } else {
                     $stmt2 = $pdo->prepare("SELECT * FROM trailers WHERE imdb_id = :id");
                     $stmt2->execute(['id' => $IMDBCode]);
                     $movie2 = $stmt2->fetch(PDO::FETCH_ASSOC);
                     $IMDB_Elozetes = $movie2['trailer_link'];
                     $Film_Link = $movie2['link'];
                 }
-            } else {
-                // If no trailer is found in the database, fetch the trailer link
-                $httpClient = new Client([
-                    'headers' => [
-                        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-                    ]
-                ]);
-
-                $response = $httpClient->get($IMDB_BaseLink . "/title/" . str_replace(" ", "+", $IMDBCode));
-                $htmlString = (string) $response->getBody();
-                libxml_use_internal_errors(true);
-                $doc = new DOMDocument();
-                $doc->loadHTML($htmlString);
-                $xpath = new DOMXPath($doc);
-
-                $trailerDiv = $xpath->evaluate('//div[@id="__next"]')->item(0);
-                $IMDBVideoURL = "";
-                if ($trailerDiv) {
-                    $links = $trailerDiv->getElementsByTagName('a');
-                    foreach ($links as $link) {
-                        $href = $link->getAttribute('href');
-                        if (strpos($href, '/video') !== false) {
-                            if (strpos($link->textContent, 'Trailer') !== false) {
-                                $IMDBVideoURL = $IMDB_BaseLink . $href;
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    //echo 'Trailer not found.';
-                }
-
-                $script = 'fetchPage.js';
-
-                $output = [];
-                $returnVar = -1;
-
-                // Execute the Puppeteer script to extract video tags
-                while($returnVar !== 0 || count($output) === 0){
-                    exec("node $script " . escapeshellarg($IMDBVideoURL), $output, $returnVar);
-                }
-                // exec("node $script " . escapeshellarg($IMDBVideoURL), $output, $returnVar);
-
-                if ($returnVar === 0) {
-                    $IMDB_Elozetes = $output[0];
-                    $stmt2 = $pdo->prepare("INSERT INTO trailers (imdb_id, trailer_link, RecordTime) VALUES (:imdb_id, :trailer_link, CURRENT_TIMESTAMP)");
-                    $stmt2->execute([
-                        'imdb_id' => $IMDBCode,  // Using movie IMDB code
-                        'trailer_link' =>  $IMDB_Elozetes       // The trailer URL extracted
-                    ]);
-                    $NeedsUpdate = true;
-                } else {
-                    echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        var footer = document.createElement('div');
-                        footer.style.position = 'fixed';
-                        footer.style.bottom = '0';
-                        footer.style.left = '0';
-                        footer.style.width = '100%';
-                        footer.style.backgroundColor = '#121212';
-                        footer.style.color = 'red';
-                        footer.style.padding = '10px';
-                        footer.style.textAlign = 'center';
-                        footer.innerText = 'Hiba történt a Puppeteer script futtatásakor.';
-                        document.body.appendChild(footer);
-                    });
-                </script>";
-                }
-
+            }
+            else{
                 $NeedsUpdate = true;
             }
-
         }
 
         // If no movies found, pull it from mozimix.com
-        if ($Film_Link == "" || $NeedsUpdate) {
-            // Remove every date from the movie title
-            $Film_Cim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
-            // Remove dots from the end of the movie title
-            $Film_Cim = preg_replace('/\.*$/', '', trim($Film_Cim));
-
-            $response2 = $httpClient->get("https://mozimix.com/?s=" . $Film_Cim);
-            $htmlContent2 = (string) $response2->getBody();
-            libxml_use_internal_errors(true);
-            $domDocument2 = new DOMDocument();
-            $domDocument2->loadHTML($htmlContent2);
-            $xpath2 = new DOMXPath($domDocument2);
-
-            // Find all the movie titles
-            $movies = $xpath2->evaluate('//div[@id="dt_contenedor"]//div[@id="contenedor"]//div[@class="module"]//div[@class="content rigth csearch"]//div[@class="search-page"]//div[@class="result-item"]//article//div[@class="details"]//div[@class="title"]/a');
-
-            $ExportLink = "";
-            $movieLink = "";
-            // Write out every movie link
-            foreach ($movies as $index => $movieTitleElement) {
-                $movieLink = $movieTitleElement->getAttribute('href');
-                // Extract inner html
-                $movieName = trim($movieTitleElement->textContent);
-            
-                // Clean the movie title
-                $cleanedFilmCim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
-                $cleanedFilmCim = preg_replace('/\.*$/', '', $cleanedFilmCim);
-                $cleanedFilmCim = trim($cleanedFilmCim);
-                
-                // Case-insensitive comparison
-                if (strcasecmp($cleanedFilmCim, $movieName) == 0) {
-                    $ExportLink = $movieLink;
-                    $BestLink = $movieLink;
-                    break;
-                }
-            }
-
-            // Export the video from the new source from the video tag
-            if ($ExportLink !== "") {
-                $Attempts = 0;
-                while($Film_Link === "" && $Attempts < 4){
-                    $ExportLink = exec("node index.js " . escapeshellarg($ExportLink));
-                    if(str_contains($ExportLink, 'Error') !== true){
-                        $Film_Link = $ExportLink;
-                    }
-                    $Attempts++;
-                }
-                $ExportLink = exec("node index.js " . escapeshellarg($BestLink));
-                $Film_Link = $ExportLink;
-            }
-
-            // Update the trailer link in the database with the new link
-            $stmt2 = $pdo->prepare("UPDATE trailers SET link = :link, RecordTime = CURRENT_TIMESTAMP WHERE imdb_id = :id");
-            $stmt2->execute([
-                'link' => $Film_Link,
-                'id' => $IMDBCode
+        if ($NeedsUpdate || !$IMDB_Elozetes) {
+            // Guzzle HTTP client
+            $httpClient = new Client([
+                'headers' => [
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                ]
             ]);
+
+            // URLs for scraping
+            $imdbUrl = $IMDB_BaseLink . "/title/" . str_replace(" ", "+", $IMDBCode);
+            // remove the year from the movie title
+            // Remove the year in parentheses and any additional parentheses with numbers
+            $Film_Cim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
+
+            // Remove dots from the end of the string
+            $Film_Cim = trim(trim($Film_Cim, " "), ".");
+            
+            $mozimixUrl = "https://mozimix.com/?s=" . $Film_Cim;
+
+            // Asynchronous requests
+            $promises = [
+                'imdb' => $httpClient->getAsync($imdbUrl),
+                'mozimix' => $httpClient->getAsync($mozimixUrl),
+            ];
+
+            // Wait for both requests to complete
+            $results = GuzzleHttp\Promise\Utils::settle($promises)->wait();
+
+            // Handle IMDB response
+            if ($results['imdb']['state'] === 'fulfilled') {
+                $IMDB_Elozetes = exec("node fetchPage.js " . escapeshellarg($IMDBCode));
+                // echo "IMDB Trailer: " . $IMDB_Elozetes . "\n";
+            } else {
+                // echo "IMDB request failed: " . $results['imdb']['reason'] . "\n";
+            }
+
+            // Handle Mozimix response
+            if ($results['mozimix']['state'] === 'fulfilled') {
+                $mozimixResponse = (string) $results['mozimix']['value']->getBody();
+                $domDocument2 = new DOMDocument();
+                libxml_use_internal_errors(true);
+                $domDocument2->loadHTML($mozimixResponse);
+                $xpath2 = new DOMXPath($domDocument2);
+
+                // Find movie links
+                $movies = $xpath2->evaluate('//div[@id="dt_contenedor"]//div[@id="contenedor"]//div[@class="module"]//div[@class="content rigth csearch"]//div[@class="search-page"]//div[@class="result-item"]//article//div[@class="details"]//div[@class="title"]/a');
+
+                $ExportLink = "";
+
+                foreach ($movies as $movieTitleElement) {
+                    $movieLink = $movieTitleElement->getAttribute('href');
+                    $movieName = trim($movieTitleElement->textContent);
+                    $movieName = trim($movieName, ".");
+                    $cleanedFilmCim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
+                    $cleanedFilmCim = preg_replace('/\.*$/', '', $cleanedFilmCim);
+
+                    if (strcasecmp(trim($Film_Cim), $movieName) == 0) {
+                        $ExportLink = $movieLink;
+                        break;
+                    }
+                }
+
+                $Film_Link = exec("node index.js " . escapeshellarg(trim($ExportLink, ".")));
+                // echo "Film Link: " . escapeshellarg(trim($ExportLink, ".")) . "\n";
+            } else {
+                // echo "Mozimix request failed: " . $results['mozimix']['reason'] . "\n";
+            }
+
+            // Update the trailer link in the database
+            if ($Film_Link && $IMDB_Elozetes) {
+                // If the record doesn't exist, insert it
+                $stmt2 = $pdo->prepare("SELECT Count(*) FROM trailers WHERE imdb_id = :id");
+                $stmt2->execute(['id' => $IMDBCode]);
+                $movie2 = $stmt2->fetch(PDO::FETCH_ASSOC);
+
+                if ($movie2['Count(*)'] == 0) {
+                    $stmt2 = $pdo->prepare("INSERT INTO trailers (imdb_id, link, trailer_link) VALUES (:id, :link, :Trailer)");
+                    $stmt2->execute([
+                        'id' => $IMDBCode,
+                        'link' => $Film_Link,
+                        'Trailer' => $IMDB_Elozetes
+                    ]);
+                }
+                else{
+                    $stmt2 = $pdo->prepare("UPDATE trailers SET link = :link, trailer_link = :Trailer, RecordTime = CURRENT_TIMESTAMP WHERE imdb_id = :id");
+                    $stmt2->execute([
+                        'link' => $Film_Link,
+                        'id' => $IMDBCode,
+                        'Trailer' => $IMDB_Elozetes
+                    ]);
+    
+                    if ($stmt2->rowCount() > 0) {
+                        // echo "Database updated successfully.\n";
+                    } else {
+                        // echo "No rows affected. Database update failed.\n";
+                    }
+                }
+            } else {
+                // echo "Missing Film Link or IMDB Trailer. Database update skipped.\n";
+            }
         }
 
     } catch (PDOException $e) {
@@ -809,7 +784,7 @@ echo "<!DOCTYPE html>
                             <source src=\"{$Film_Link}\" type=\"application/x-mpegURL\">
                             </video-js>";
                         }
-                        else if(strpos($Film_Link, 'mkv') !== false){
+                        else if(strpos($Film_Link, 'mkv') !== false || str_contains($Film_Link, "moviePlaybackRedirect")){
                             // Try playing it in the browser
                         echo '<video id="my-video" class="video-js" controls preload="auto" width="640" height="360"
                                     data-setup=\'{}\'>

@@ -17,7 +17,7 @@ if (!urlToVisit) {
     page.on('response', async (response) => {
         const url = response.url();
         // Check if the URL is an m3u8 file
-        if (url.includes('master.m3u8') || url.includes('indavideo.hu') || url.includes('videa.hu') || url.includes('imdb-video.media-imdb.com')){
+        if (url.includes('master.m3u8') || url.includes('indavideo.hu') || url.includes('videa.hu') || url.includes('moviePlaybackRedirect') || url.includes('.mp4')){
             console.log(url);
             process.exit(0); // Exit the process after finding the first m3u8 URL
         }

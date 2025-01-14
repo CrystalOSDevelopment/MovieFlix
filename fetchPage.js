@@ -1,36 +1,73 @@
-const puppeteer = require('puppeteer');
-
 (async () => {
-    const url = process.argv[2];
-    const browser = await puppeteer.launch({
-        headless: true, // Set to false if you want to see the browser in action
-    });
+    const fetch = (await import('node-fetch')).default;
 
-    const page = await browser.newPage();
+    let API_KEY = '';
 
-    // Set user agent to mimic a real browser
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
+    const imdbId = process.argv[2];
+    const url = `https://api.kinocheck.com/movies?imdb_id=${imdbId}&language=en`;
 
-    let mp4Found = false;
+    let TMDB_ID = "";
 
-    // Listen to network responses
-    page.on('response', async (response) => {
-        const url = response.url();
-        // Check if the URL is an mp4 file
-        if (url.includes('.mp4')) {
-            console.log(url);
-            mp4Found = true;
-            //await browser.close();
-            process.exit(0); // Exit the process after finding the first MP4 URL
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Extract the tmdb_id from the JSON response
+        TMDB_ID = data.tmdb_id;
+
+        // console.log('TMDB ID:', TMDB_ID);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+
+    if (TMDB_ID !== '') {
+        // Get the youtube url from the first video
+        const tmdbUrl = `https://api.themoviedb.org/3/movie/${TMDB_ID}/videos?language=en-US`;
+        const options = {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                Authorization: 'Bearer ' + API_KEY
+            }
+        };
+
+        let YOUTUBE_URL = '';
+
+        try {
+            const res = await fetch(tmdbUrl, options);
+            const json = await res.json();
+            YOUTUBE_URL = "https://www.youtube.com/watch?v=" + json.results[0].key;
+            // console.log(json.results[0].key);
+            // console.log("Full link: https://www.youtube.com/watch?v=" + json.results[0].key);
+            // console.log("YOUTUBE URL: ", YOUTUBE_URL);
+        } catch (err) {
+            console.error(err);
         }
-    });
 
-    // Navigate to IMDb
-    await page.goto(url, { waitUntil: 'networkidle2' });
+        // Extract video from the youtube link by using the youtube-dl-exec package
+        const youtubeDl = (await import('youtube-dl-exec')).default;
 
-    // Close the browser if no MP4 URL is found
-    if (!mp4Found) {
-        await browser.close();
-        process.exit(1); // Exit with a non-zero code to indicate no MP4 URL was found
+        if (YOUTUBE_URL !== '') {
+            try {
+                const info = await youtubeDl(YOUTUBE_URL, {
+                    format: 'best',
+                    dumpSingleJson: true
+                });
+                // Only write out the highest resolution video
+                let MaxRes = 0;
+                let Link = '';
+                for (let i = 0; i < info.formats.length; i++) {
+                    if(info.formats[i].height > MaxRes && info.formats[i].url.includes('mp4')) {
+                        MaxRes = info.formats[i].height;
+                        Link = info.formats[i].url;
+                    }
+                }
+                console.log(Link);
+            } catch (err) {
+                console.error('Error downloading video:', err);
+            }
+        } else {
+            console.error('No YouTube URL found.');
+        }
     }
 })();

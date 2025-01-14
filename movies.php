@@ -99,7 +99,7 @@ else if($Command != "") {
 else if($wantRecents != "") {
     // Join recents and links tables to get the most recent movies
     // Order is in reverse chronological order
-    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ? ORDER BY recents.movieID DESC");
+    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ? ORDER BY recents.userID DESC");
     $stmt->bind_param("i", $UserID);
 }
 else if($addtoFavorites != "") {
@@ -164,7 +164,7 @@ else if($deleteMovie != "") {
 }
 else if($wantFavorites != "") {
     // Join favorites and links tables to get the favorite movies
-    $stmt = $conn->prepare("SELECT * FROM favorites JOIN links ON favorites.movieID = links.id WHERE favorites.userID = ?");
+    $stmt = $conn->prepare("SELECT * FROM favorites JOIN links ON favorites.movieID = links.id WHERE favorites.userID = ? ORDER BY favorites.userID DESC");
     $stmt->bind_param("i", $UserID);
 }
 else if($genre != "") {
