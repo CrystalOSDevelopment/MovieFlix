@@ -112,6 +112,8 @@ if ($MovieID) {
             // remove the year from the movie title
             // Remove the year in parentheses and any additional parentheses with numbers
             $Film_Cim = preg_replace('/\(\d{4}\)(\s*\(\d+\))*$/', '', $Film_Cim);
+            //Make sure to remove year from the end of the string
+            $Film_Cim = str_replace($Film_Megjelenes, "", $Film_Cim);
 
             // Remove dots from the end of the string
             $Film_Cim = trim(trim($Film_Cim, " "), ".");
@@ -623,6 +625,12 @@ echo "<!DOCTYPE html>
                 z-index: 9999;
             }
 
+            .video-js[tabindex=\"-1\"]{
+                outline: none;
+                width: 100%;
+                height: 100%;
+            }
+
             /* Spinner animáció betöltés előtt */
             .spinner {
                 width: 50px;
@@ -784,9 +792,9 @@ echo "<!DOCTYPE html>
                             <source src=\"{$Film_Link}\" type=\"application/x-mpegURL\">
                             </video-js>";
                         }
-                        else if(strpos($Film_Link, 'mkv') !== false || str_contains($Film_Link, "moviePlaybackRedirect")){
+                        else if(strpos($Film_Link, 'mkv') !== false || str_contains($Film_Link, "moviePlaybackRedirect") || str_contains($Film_Link, "https://vk6-7.vkuser.net")) {
                             // Try playing it in the browser
-                        echo '<video id="my-video" class="video-js" controls preload="auto" width="640" height="360"
+                        echo '<video id="my-video" class="video-js" controls preload="auto" width="" height="360"
                                     data-setup=\'{}\'>
                                     <source src="' . $Film_Link. '" type="video/webm"> <!-- Replace with the file path -->
                                     <p class="vjs-no-js">
@@ -811,13 +819,13 @@ echo "<!DOCTYPE html>
                 <img src=\"Resources/Images/logo.svg\" alt=\"MovieFlix Logo\" class=\"logo\">
                 <div class=\"menu\">
                     <div class=\"menu-item\">
-                        <a href=\"index.html\" style=\"text-decoration: none; color: inherit;\">Főoldal</a>
+                        <a href=\"index.php\" style=\"text-decoration: none; color: inherit;\">Főoldal</a>
                     </div>
                     <div class=\"menu-item\">
-                        <a href=\"index.html?Page=Recents\" style=\"text-decoration: none; color: inherit;\">Legutóbbiak</a>
+                        <a href=\"index.php?Page=Recents\" style=\"text-decoration: none; color: inherit;\">Legutóbbiak</a>
                     </div>
                     <div class=\"menu-item\">
-                        <a href=\"index.html?Page=Favorites\" style=\"text-decoration: none; color: inherit;\">Kedvencek</a>
+                        <a href=\"index.php?Page=Favorites\" style=\"text-decoration: none; color: inherit;\">Kedvencek</a>
                     </div>
                     <!-- <div class=\"menu-item\">Profilom</div>
                     <div class=\"menu-item\">Beállítások</div> -->
@@ -987,7 +995,7 @@ echo "<!DOCTYPE html>
                     if (xhr.readyState == 4 && xhr.status == 200) {
                         const response = xhr.responseText.trim();
                         if (response === 'true') {
-                            window.location.href = 'index.html';
+                            window.location.href = 'index.php';
                         }
                     }
                 };

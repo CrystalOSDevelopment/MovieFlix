@@ -18,7 +18,7 @@
 
     define('MAILHOST', 'smtp.gmail.com');
     define('USERNAME', "crystalosdev@gmail.com");
-    define('PASSWORD', "zbadpqvbdwqdekyj");
+    define('PASSWORD', "");
     define('SEND_FROM', "info@movieflix.com");
     define('SEND_FROM_NAME', "MovieFlix");
     define('REPLY_TO', "info@movieflix.com");

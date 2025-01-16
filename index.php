@@ -508,14 +508,15 @@
                                     $result = $stmt->get_result();
                                     $users = $result->fetch_all(MYSQLI_ASSOC);
                                     $UserID = $users[0]['UserID'];
-                                    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ? ORDER BY recents.movieID DESC");
+                                    $stmt = $conn->prepare("SELECT * FROM recents JOIN links ON recents.movieID = links.id WHERE recents.userID = ?");
                                     $stmt->bind_param("i", $UserID);
                                     $stmt->execute();
                                     $result = $stmt->get_result();
                                     $recents = $result->fetch_all(MYSQLI_ASSOC);
                                     if(count($recents) > 0){
                                         $stmt = $conn->prepare("SELECT * FROM links WHERE id = ?");
-                                        $stmt->bind_param("i", $recents[0]['movieID']);
+                                        // The last element of the recents array is the most recent one
+                                        $stmt->bind_param("i", $recents[count($recents) - 1]['movieID']);
                                         $stmt->execute();
                                         $result = $stmt->get_result();
                                         $movies = $result->fetch_all(MYSQLI_ASSOC);
@@ -632,7 +633,7 @@
     <script>
         document.getElementById('MainPage').addEventListener('click', function(event){
             event.preventDefault();
-            // Recommendations(event);
+            Recommendations(event);
         });
 
         document.getElementById('searchForm').addEventListener('submit', function(event) { // Change submit to click and it'll do real time search (tinkering with the code is needed to it tho)
@@ -754,6 +755,9 @@
 
                 document.getElementById('AutoComplete').style.display = 'block';
 
+                let MaxResult = 5;
+                let Index = 0;
+
                 // Get json data from movies.php
                 fetch('movies.php?search=' + document.getElementById('SearchTerm').value)
                 .then(response => response.json())
@@ -763,6 +767,12 @@
 
                     // Add the data to the autocomplete div
                     data.forEach(movie => {
+                        if(Index < MaxResult){
+                            Index++;
+                        }
+                        else{
+                            return;
+                        }
                         const div = document.createElement('div');
                         // Add class to div
                         div.classList.add('AutoCompleteItem');
@@ -809,6 +819,7 @@
                 console.log('Clearing search results');
 
                 document.getElementById('AutoComplete').style.display = 'none';
+                document.getElementById('AutoComplete').innerHTML = '';
             }
         });
     </script>
