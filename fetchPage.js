@@ -57,7 +57,7 @@
                 let MaxRes = 0;
                 let Link = '';
                 for (let i = 0; i < info.formats.length; i++) {
-                    if(info.formats[i].height > MaxRes && info.formats[i].url.includes('mp4')) {
+                    if (info.formats[i].height > MaxRes && info.formats[i].vcodec !== 'none' && info.formats[i].acodec !== 'none') {
                         MaxRes = info.formats[i].height;
                         Link = info.formats[i].url;
                     }

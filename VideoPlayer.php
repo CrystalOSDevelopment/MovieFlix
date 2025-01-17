@@ -836,7 +836,7 @@ echo "<!DOCTYPE html>
                     echo "<div id=\"no-trailer-message\" style=\"display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.8); color: white; padding: 20px; font-size: 35px; border-radius: 10px; text-align: center;\">Nincs elérhető előzetes</div>";
                 }
                 else{
-                    echo "<video autoplay muted loop src=\"{$IMDB_Elozetes}\" style=\"max-width: 100%;\"></video>";
+                    echo "<video autoplay muted loop src=\"{$IMDB_Elozetes}\" style=\"max-width: 100%;\" id=\"Trailer\"></video>";
                 }
                 echo "
             </div>
@@ -889,6 +889,40 @@ echo "<!DOCTYPE html>
                     // Gomb kattintás eseménykezelő - modal megnyitása
                     openModalBtn.addEventListener('click', function() {
                         modal.style.display = 'block'; // Modal megjelenítése
+
+                        // redirect to the movie page with post as data passthru
+                        function redirectToMoviePlayer(movieID, movieName, movieURL) {
+                            // Create a form element
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = 'MoviePlayer.php';
+
+                            // Create hidden input elements for each piece of data
+                            const inputMovieID = document.createElement('input');
+                            inputMovieID.type = 'hidden';
+                            inputMovieID.name = 'MovieID';
+                            inputMovieID.value = movieID;
+                            form.appendChild(inputMovieID);
+
+                            const inputMovieName = document.createElement('input');
+                            inputMovieName.type = 'hidden';
+                            inputMovieName.name = 'MovieTitle';
+                            inputMovieName.value = movieName;
+                            form.appendChild(inputMovieName);
+
+                            const inputMovieURL = document.createElement('input');
+                            inputMovieURL.type = 'hidden';
+                            inputMovieURL.name = 'MovieURL';
+                            inputMovieURL.value = movieURL;
+                            form.appendChild(inputMovieURL);
+
+                            // Append the form to the body and submit it
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+
+                        // Call the function with your variables
+                        redirectToMoviePlayer('$MovieID', '$Film_Cim', '$Film_Link');
                     });
 
                     // Close gomb kattintás eseménykezelő - modal eltüntetése
@@ -1002,6 +1036,61 @@ echo "<!DOCTYPE html>
                 xhr.send(); // This is crucial to send the request
             });
         </script>
+
+        <script>
+            let timeoutId;
+            document.getElementById('Trailer').addEventListener('mouseover', function() {
+                // If the cursor doesn't move for 3 seconds, write a message
+                timeoutId = setTimeout(function() {
+                    console.log('Cursor stopped');
+
+                    // Only if the cursor is not touching the bottom bar
+                    if (document.querySelector('.bottom-bar:hover') === null) {
+                        document.querySelector('.bottom-bar').style.bottom = '-100%';
+                        document.querySelector('.header').style.top = '-100%';
+                        document.querySelector('.header').style.position = 'relative';
+                        
+                        const l = document.getElementById('Trailer').muted = false;
+                    }
+                    // document.querySelector('.bottom-bar').style.bottom = '-100%';
+                    // document.querySelector('.header').style.top = '-100%';
+                    // document.querySelector('.header').style.position = 'relative';
+
+                }, 3000);
+            });
+
+            // If the cursor moves, clear the timeout
+            document.getElementById('Trailer').addEventListener('mousemove', function() {
+                console.log('Cursor moved');
+                
+                document.querySelector('.bottom-bar').style.bottom = '-330px';
+                document.querySelector('.header').style.top = '0px';
+                document.querySelector('.header').style.position = 'sticky';
+
+                // mute the video
+                document.getElementById('Trailer').muted = true;
+
+                clearTimeout(timeoutId);
+                // Restart the timeout
+                timeoutId = setTimeout(function() {
+                    console.log('Cursor stopped');
+
+                    // Only if the cursor is not touching the bottom bar
+                    if (document.querySelector('.bottom-bar:hover') === null) {
+                        document.querySelector('.bottom-bar').style.bottom = '-100%';
+                        document.querySelector('.header').style.top = '-100%';
+                        document.querySelector('.header').style.position = 'relative';
+                        
+                        const l = document.getElementById('Trailer').muted = false;
+                    }
+                    // document.querySelector('.bottom-bar').style.bottom = '-100%';
+                    // document.querySelector('.header').style.top = '-100%';
+                    // document.querySelector('.header').style.position = 'relative';
+
+                }, 3000);
+            });
+        </script>
+
         <script>
             document.onreadystatechange = function () {
                 if (document.readyState !== \"complete\") {
@@ -1016,9 +1105,7 @@ echo "<!DOCTYPE html>
                         \"body\").style.visibility = \"visible\";
                 }
             };
-
-
-    </script>
+        </script>
     </body>
 </html>";
 ?>

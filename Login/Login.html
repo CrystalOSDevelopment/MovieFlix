@@ -19,7 +19,7 @@
                     adatbázisunkból mostanra több mint 1000 filmet nézhet meg bárhol, bármikor!
                 </p>
             </div>
-            <form id="registerForm" method="POST">
+            <form id="registerForm" class="Desktop_Mode" method="POST">
                 <h2>Bejelentkezés</h2>
                 <P id="response"></P>
                 <input type="text" name="UName" placeholder="Felhasználónév" required>
@@ -33,7 +33,7 @@
     <!-- This is for mobile mode -->
     <div class="Form-Container Mobile">
         <div class="Coupling-div">
-            <form id="registerForm" method="POST">
+            <form id="registerForm" class="Mobile_Mode" method="POST">
                 <h2>Bejelentkezés</h2>
                 <P id="response"></P>
                 <input type="text" name="UName" placeholder="Felhasználónév" required>
@@ -53,7 +53,44 @@
 
     <script>
         $(document).ready(function() {
-            $('#registerForm').on('submit', function(event) {
+            $('.Desktop_Mode').on('submit', function(event) {
+                event.preventDefault(); // Prevent the form from submitting the traditional way
+
+                $.ajax({
+                    url: 'Login.php',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        switch(response){
+                            case '0':
+                                response = 'Sikertelen kapcsolódás az adatbázishoz!';
+                                break;
+                            case '1':
+                                response = 'Ilyen felhsználónév nem található!';
+                                break;
+                            case '2':
+                                response = 'Nem megfelelő felhasználónév vagy jelszó!';
+                                break;
+                            case '3':
+                                response = 'Nem megfelelő felhasználónév vagy jelszó!';
+                                break;
+                            case '4':
+                                response = 'Sikeres belépés!';
+                                break;
+                        }
+                        $('#response').html(response); // Display the response in the #response div
+                        $('#response').css('display', 'block'); // Display the #response div
+
+                        if(response == 'Sikeres belépés!'){
+                            window.location.href = '../BootAnimation.php';
+                        }
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            $('.Mobile_Mode').on('submit', function(event) {
                 event.preventDefault(); // Prevent the form from submitting the traditional way
 
                 $.ajax({
